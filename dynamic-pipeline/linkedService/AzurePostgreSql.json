@@ -1,0 +1,17 @@
+{
+	"name": "AzurePostgreSql",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzurePostgreSql",
+		"version": "2.0",
+		"typeProperties": {
+			"server": "4.213.177.85",
+			"port": 5432,
+			"database": "cms",
+			"sslMode": 2,
+			"username": "app_user",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDYxQzJBQjNDLUQ4RjAtNEVCMS05ODg5LTlGODhEQTNGODNFOF81Mzc2ZjE2OS0zZDE1LTRhNTUtYTA0YS05NDNlNjQzMWQwZmIiDQp9"
+		}
+	}
+}
