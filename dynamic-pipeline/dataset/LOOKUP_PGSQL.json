@@ -5,9 +5,6 @@
 			"referenceName": "AzurePostgreSql",
 			"type": "LinkedServiceReference"
 		},
-		"folder": {
-			"name": "Arshad/Incremental_load"
-		},
 		"annotations": [],
 		"type": "AzurePostgreSqlTable",
 		"schema": [
