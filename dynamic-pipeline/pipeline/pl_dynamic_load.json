@@ -370,6 +370,15 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"dataflow": {
+									"referenceName": "df_scd_1",
+									"type": "DataFlowReference",
+									"datasetParameters": {
+										"TargetTable": {
+											"SrcTableName": "arshad.website_traffic_stg"
+										}
+									}
+								},
 								"compute": {
 									"coreCount": 8,
 									"computeType": "General"
