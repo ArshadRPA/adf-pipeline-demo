@@ -1,0 +1,51 @@
+{
+	"name": "df_scd1",
+	"properties": {
+		"folder": {
+			"name": "Arshad/SCD_1_AND_2"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "SourceTables"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "TGT_PGSQL",
+						"type": "DatasetReference"
+					},
+					"name": "TargetTable",
+					"description": "ETaxport data to TGT_PGSQL"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Upsert"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     scd1_primary_key_column as string",
+				"}",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true) ~> SourceTables",
+				"SourceTables alterRow(upsertIf(1==1)) ~> Upsert",
+				"Upsert sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:false,",
+				"     upsertable:true,",
+				"     keys:[($scd1_primary_key_column)],",
+				"     format: 'table',",
+				"     batchSize: 3,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> TargetTable"
+			]
+		}
+	}
+}
