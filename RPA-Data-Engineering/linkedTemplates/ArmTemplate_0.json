@@ -603,7 +603,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_dynamic_load')]",
+			"name": "[concat(parameters('factoryName'), '/df_scd_2')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2269,7 +2269,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"dataflow": {
-											"referenceName": "df_dynamic_load",
+											"referenceName": "df_scd_2",
 											"type": "DataFlowReference",
 											"parameters": {
 												"scd2_timestamp_column_name": {
@@ -3034,7 +3034,7 @@
 				"[concat(variables('factoryId'), '/dataflows/df_scd_1')]",
 				"[concat(variables('factoryId'), '/datasets/SCR_PGSQL')]",
 				"[concat(variables('factoryId'), '/datasets/TGT_PGSQL')]",
-				"[concat(variables('factoryId'), '/dataflows/df_dynamic_load')]"
+				"[concat(variables('factoryId'), '/dataflows/df_scd_2')]"
 			]
 		}
 	]
