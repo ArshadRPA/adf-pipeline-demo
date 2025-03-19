@@ -1468,6 +1468,15 @@
 												"value": "@item().source_table",
 												"type": "Expression"
 											}
+										},
+										"TargetTables": {
+											"SrcTableName": "arshad.website_traffic_stg"
+										},
+										"LoadInsert": {
+											"SrcTableName": "arshad.website_traffic_stg"
+										},
+										"LoadUpdate": {
+											"SrcTableName": "arshad.website_traffic_stg"
 										}
 									}
 								},
