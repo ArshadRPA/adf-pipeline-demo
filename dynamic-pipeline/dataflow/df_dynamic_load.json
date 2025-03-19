@@ -25,7 +25,7 @@
 						"referenceName": "TGT_PGSQL",
 						"type": "DatasetReference"
 					},
-					"name": "LoadInsert"
+					"name": "LoadUpsert"
 				},
 				{
 					"dataset": {
@@ -125,7 +125,7 @@
 				"     upsertable:false,",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> LoadInsert",
+				"     skipDuplicateMapOutputs: true) ~> LoadUpsert",
 				"UpdateIf sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     deletable:false,",
