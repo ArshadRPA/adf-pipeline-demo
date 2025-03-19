@@ -1,6 +1,10 @@
 {
 	"name": "SCR_PGSQL",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzurePostgreSql",
+			"type": "LinkedServiceReference"
+		},
 		"parameters": {
 			"SrcTableName": {
 				"type": "string",
