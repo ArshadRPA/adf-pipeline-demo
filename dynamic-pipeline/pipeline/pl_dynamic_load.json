@@ -164,14 +164,32 @@
 								}
 							],
 							"typeProperties": {
+								"source": {
+									"type": "AzurePostgreSqlSource",
+									"partitionOption": "None"
+								},
 								"sink": {
 									"type": "AzurePostgreSQLSink",
 									"writeBatchSize": 1000000,
 									"writeBatchTimeout": "00:30:00",
 									"writeMethod": "CopyCommand"
 								},
-								"enableStaging": false
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
+							"inputs": [
+								{
+									"referenceName": "dummy_audit_table",
+									"type": "DatasetReference"
+								}
+							],
 							"outputs": [
 								{
 									"referenceName": "audit_table",
