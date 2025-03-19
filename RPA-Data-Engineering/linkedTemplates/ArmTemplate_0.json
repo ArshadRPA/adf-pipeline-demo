@@ -144,7 +144,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"SrcTableName": {
+					"TgtTableName": {
 						"type": "string"
 					}
 				},
@@ -153,11 +153,11 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": {
-						"value": "@split(dataset().SrcTableName, '.')[0]",
+						"value": "@split(dataset().TgtTableName, '.')[0]",
 						"type": "Expression"
 					},
 					"table": {
-						"value": "@split(dataset().SrcTableName, '.')[1]",
+						"value": "@split(dataset().TgtTableName, '.')[1]",
 						"type": "Expression"
 					}
 				}
@@ -1199,10 +1199,16 @@
 											},
 											"datasetParameters": {
 												"SourceTables": {
-													"SrcTableName": "arshad.website_traffic_stg"
+													"SrcTableName": {
+														"value": "@item().source_table",
+														"type": "Expression"
+													}
 												},
 												"TargetTable": {
-													"SrcTableName": "arshad.website_traffic_stg"
+													"TgtTableName": {
+														"value": "@item().target_table",
+														"type": "Expression"
+													}
 												}
 											},
 											"linkedServiceParameters": {}
@@ -1622,7 +1628,7 @@
 											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
 											"parameters": {
-												"SrcTableName": {
+												"TgtTableName": {
 													"value": "@item().target_table",
 													"type": "Expression"
 												}
@@ -2301,15 +2307,25 @@
 													}
 												},
 												"TargetTables": {
-													"SrcTableName": "arshad.website_traffic_stg"
+													"TgtTableName": {
+														"value": "@item().target_table",
+														"type": "Expression"
+													}
 												},
 												"LoadUpsert": {
-													"SrcTableName": "arshad.website_traffic_stg"
+													"TgtTableName": {
+														"value": "@item().target_table",
+														"type": "Expression"
+													}
 												},
 												"LoadUpdate": {
-													"SrcTableName": "arshad.website_traffic_stg"
+													"TgtTableName": {
+														"value": "@item().target_table",
+														"type": "Expression"
+													}
 												}
-											}
+											},
+											"linkedServiceParameters": {}
 										},
 										"staging": {},
 										"compute": {
