@@ -375,7 +375,7 @@
 									"type": "DataFlowReference",
 									"parameters": {
 										"scd1_primary_key_column": {
-											"value": "'@{variables('scd1_primary_key_column')}'",
+											"value": "'@{item().primary_key_column}'",
 											"type": "Expression"
 										}
 									},
