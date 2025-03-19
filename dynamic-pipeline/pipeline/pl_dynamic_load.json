@@ -1,5 +1,5 @@
 {
-	"name": "pl_scd1_scd2_with_inc_load_working",
+	"name": "pl_dynamic_load",
 	"properties": {
 		"activities": [
 			{
@@ -1256,7 +1256,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "df_scd_2_new_dynamic",
+									"referenceName": "df_dynamic_load",
 									"type": "DataFlowReference",
 									"parameters": {
 										"scd2_timestamp_column_name": {
