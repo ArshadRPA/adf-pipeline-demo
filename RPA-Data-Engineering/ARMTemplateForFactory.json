@@ -1519,9 +1519,15 @@
 														"type": "Expression"
 													}
 												},
-												"TargetTables": {},
-												"LoadInsert": {},
-												"LoadUpdate": {}
+												"TargetTables": {
+													"SrcTableName": "arshad.website_traffic_stg"
+												},
+												"LoadInsert": {
+													"SrcTableName": "arshad.website_traffic_stg"
+												},
+												"LoadUpdate": {
+													"SrcTableName": "arshad.website_traffic_stg"
+												}
 											}
 										},
 										"staging": {},
