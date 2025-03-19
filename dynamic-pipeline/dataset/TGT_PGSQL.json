@@ -7,8 +7,7 @@
 		},
 		"parameters": {
 			"SrcTableName": {
-				"type": "string",
-				"defaultValue": "arshad.website_traffic_stg"
+				"type": "string"
 			}
 		},
 		"annotations": [],
