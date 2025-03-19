@@ -1447,18 +1447,6 @@
 												"value": "@item().source_table",
 												"type": "Expression"
 											}
-										},
-										"TargetTables": {
-											"TgtTableName": {
-												"value": "@item().target_table",
-												"type": "Expression"
-											}
-										},
-										"LoadInsert": {
-											"TgtTableName": "@item().target_table"
-										},
-										"LoadUpdate": {
-											"TgtTableName": "@item().target_table"
 										}
 									}
 								},

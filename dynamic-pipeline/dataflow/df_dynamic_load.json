@@ -5,17 +5,33 @@
 		"typeProperties": {
 			"sources": [
 				{
+					"dataset": {
+						"referenceName": "SCR_PGSQL",
+						"type": "DatasetReference"
+					},
 					"name": "SourceTables"
 				},
 				{
+					"dataset": {
+						"referenceName": "TGT_PGSQL",
+						"type": "DatasetReference"
+					},
 					"name": "TargetTables"
 				}
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "TGT_PGSQL",
+						"type": "DatasetReference"
+					},
 					"name": "LoadInsert"
 				},
 				{
+					"dataset": {
+						"referenceName": "TGT_PGSQL",
+						"type": "DatasetReference"
+					},
 					"name": "LoadUpdate"
 				}
 			],
@@ -61,10 +77,14 @@
 				"}",
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: true,",
-				"     inferDriftedColumnTypes: true) ~> SourceTables",
+				"     inferDriftedColumnTypes: true,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceTables",
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: true,",
-				"     inferDriftedColumnTypes: true) ~> TargetTables",
+				"     inferDriftedColumnTypes: true,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> TargetTables",
 				"SourceTables derive(Hash = md5(concat(\r",
 				"    coalesce(toString(byName($scd2_all_column_names[0])), ''), '|',\r",
 				"    coalesce(toString(byName($scd2_all_column_names[1])), ''), '|',\r",
@@ -99,14 +119,22 @@
 				"AuditColumns alterRow(upsertIf(true())) ~> UpsertIf",
 				"UpsertIf sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     format: 'table') ~> LoadInsert",
+				"     skipDuplicateMapOutputs: true) ~> LoadInsert",
 				"UpdateIf sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     format: 'table') ~> LoadUpdate"
+				"     skipDuplicateMapOutputs: true) ~> LoadUpdate"
 			]
 		}
 	}
