@@ -1,0 +1,116 @@
+{
+	"name": "df_scd_2_new_dynamic",
+	"properties": {
+		"folder": {
+			"name": "Arshad"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "SourceTables"
+				},
+				{
+					"name": "TargetTables"
+				}
+			],
+			"sinks": [
+				{
+					"name": "LoadInsert"
+				},
+				{
+					"name": "LoadUpdate"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SourceHash"
+				},
+				{
+					"name": "TargetHash"
+				},
+				{
+					"name": "AuditColumns"
+				},
+				{
+					"name": "ForInsertRow"
+				},
+				{
+					"name": "ExistsTarget"
+				},
+				{
+					"name": "UpdateIf"
+				},
+				{
+					"name": "UpdateAuditColumns"
+				},
+				{
+					"name": "FilterActiveOnly"
+				},
+				{
+					"name": "ExisitsForUpdate"
+				},
+				{
+					"name": "UpsertIf"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     scd2_timestamp_column_name as string,",
+				"     scd2_all_column_names as string[],",
+				"     scd2_source_primary_key as string,",
+				"     scd2_target_primary_key as string,",
+				"     scd2_active_column as string",
+				"}",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true) ~> SourceTables",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     inferDriftedColumnTypes: true) ~> TargetTables",
+				"SourceTables derive(Hash = md5(concat(\r",
+				"    coalesce(toString(byName($scd2_all_column_names[0])), ''), '|',\r",
+				"    coalesce(toString(byName($scd2_all_column_names[1])), ''), '|',\r",
+				"    coalesce(toString(byName($scd2_all_column_names[2])), ''), '|',\r",
+				"    coalesce(toString(byName($scd2_all_column_names[3])), ''), '|',\r",
+				"    coalesce(toString(byName($scd2_all_column_names[4])), '')\r",
+				"))) ~> SourceHash",
+				"FilterActiveOnly derive(Hash = md5(concat(    \r",
+				"    coalesce(toString(byName($scd2_all_column_names[0])), ''), '|',    \r",
+				"    coalesce(toString(byName($scd2_all_column_names[1])), ''), '|',    \r",
+				"    coalesce(toString(byName($scd2_all_column_names[2])), ''), '|',    \r",
+				"    coalesce(toString(byName($scd2_all_column_names[3])), ''), '|',    \r",
+				"    coalesce(toString(byName($scd2_all_column_names[4])), '')\r",
+				"    )\r",
+				")) ~> TargetHash",
+				"ForInsertRow derive(start_date = currentTimestamp(),",
+				"          end_date = toTimestamp('2099-12-31','yyyy-MM-dd'),",
+				"          status = 'Y') ~> AuditColumns",
+				"SourceHash, TargetHash exists(SourceHash@Hash == TargetHash@Hash,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> ForInsertRow",
+				"TargetHash, SourceHash exists($scd2_source_primary_key==$scd2_target_primary_key,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> ExistsTarget",
+				"UpdateAuditColumns alterRow(updateIf(true())) ~> UpdateIf",
+				"ExisitsForUpdate derive(end_date = currentTimestamp(),",
+				"          status = 'N') ~> UpdateAuditColumns",
+				"TargetTables filter(toString(byName(($scd2_active_column)))=='Y') ~> FilterActiveOnly",
+				"ExistsTarget, SourceHash exists(TargetHash@Hash==SourceHash@Hash,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> ExisitsForUpdate",
+				"AuditColumns alterRow(upsertIf(true())) ~> UpsertIf",
+				"UpsertIf sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     format: 'table') ~> LoadInsert",
+				"UpdateIf sink(allowSchemaDrift: true,",
+				"     validateSchema: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     format: 'table') ~> LoadUpdate"
+			]
+		}
+	}
+}
