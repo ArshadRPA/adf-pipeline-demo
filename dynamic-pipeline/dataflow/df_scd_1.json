@@ -1,9 +1,6 @@
 {
-	"name": "df_scd1",
+	"name": "df_scd_1",
 	"properties": {
-		"folder": {
-			"name": "Arshad/SCD_1_AND_2"
-		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
