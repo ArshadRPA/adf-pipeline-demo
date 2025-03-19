@@ -745,8 +745,46 @@
 									},
 									"partitionOption": "None"
 								},
-								"enableStaging": false
-							}
+								"sink": {
+									"type": "AzurePostgreSQLSink",
+									"writeBatchSize": 1000000,
+									"writeBatchTimeout": "00:30:00",
+									"writeMethod": "CopyCommand"
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SCR_PGSQL",
+									"type": "DatasetReference",
+									"parameters": {
+										"SrcTableName": {
+											"value": "@item().source_table",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "TGT_PGSQL",
+									"type": "DatasetReference",
+									"parameters": {
+										"SrcTableName": {
+											"value": "@item().target_table",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
 						{
 							"name": "inc_start_time",
