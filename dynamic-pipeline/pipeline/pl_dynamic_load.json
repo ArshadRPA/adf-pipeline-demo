@@ -387,7 +387,10 @@
 											}
 										},
 										"TargetTable": {
-											"SrcTableName": "@item"
+											"SrcTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
 										}
 									}
 								},
@@ -1473,13 +1476,22 @@
 											}
 										},
 										"TargetTables": {
-											"SrcTableName": "arshad.website_traffic_stg"
+											"SrcTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
 										},
 										"LoadUpsert": {
-											"SrcTableName": "arshad.website_traffic_stg"
+											"SrcTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
 										},
 										"LoadUpdate": {
-											"SrcTableName": "arshad.website_traffic_stg"
+											"SrcTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
 										}
 									}
 								},
