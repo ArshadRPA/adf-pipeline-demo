@@ -1,6 +1,10 @@
 {
 	"name": "audit_table",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzurePostgreSql",
+			"type": "LinkedServiceReference"
+		},
 		"annotations": [],
 		"type": "AzurePostgreSqlTable",
 		"schema": [
