@@ -26,8 +26,6 @@
 			{
 				"name": "scd1_LoopForEachTable",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_scd_1",
@@ -584,8 +582,6 @@
 			{
 				"name": "filter_scd_1",
 				"type": "Filter",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "LookupFileNames",
@@ -964,8 +960,6 @@
 			{
 				"name": "filter_scd_2",
 				"type": "Filter",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "LookupFileNames",
@@ -989,8 +983,6 @@
 			{
 				"name": "scd2_LoopForEachTable",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_scd_2",
