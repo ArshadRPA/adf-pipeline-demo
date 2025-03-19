@@ -20,6 +20,10 @@
 						"query": "select source_table, target_table, timestamp_column_name, primary_key_column, load_type, all_column_names from arshad.master_table_inc_load where status=true;",
 						"partitionOption": "None"
 					},
+					"dataset": {
+						"referenceName": "LOOKUP_PGSQL",
+						"type": "DatasetReference"
+					},
 					"firstRowOnly": false
 				}
 			},
