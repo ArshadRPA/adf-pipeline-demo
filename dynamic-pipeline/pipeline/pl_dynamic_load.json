@@ -381,10 +381,13 @@
 									},
 									"datasetParameters": {
 										"SourceTables": {
-											"SrcTableName": "arshad.website_traffic_stg"
+											"SrcTableName": {
+												"value": "@item().source_table",
+												"type": "Expression"
+											}
 										},
 										"TargetTable": {
-											"SrcTableName": "arshad.website_traffic_stg"
+											"SrcTableName": "@item"
 										}
 									}
 								},
