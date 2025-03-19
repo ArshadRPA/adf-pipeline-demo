@@ -1,9 +1,6 @@
 {
 	"name": "df_dynamic_load",
 	"properties": {
-		"folder": {
-			"name": "Arshad"
-		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
