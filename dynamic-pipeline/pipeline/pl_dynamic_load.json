@@ -387,7 +387,7 @@
 											}
 										},
 										"TargetTable": {
-											"SrcTableName": {
+											"TgtTableName": {
 												"value": "@item().target_table",
 												"type": "Expression"
 											}
@@ -805,7 +805,7 @@
 									"referenceName": "TGT_PGSQL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SrcTableName": {
+										"TgtTableName": {
 											"value": "@item().target_table",
 											"type": "Expression"
 										}
@@ -1476,19 +1476,19 @@
 											}
 										},
 										"TargetTables": {
-											"SrcTableName": {
+											"TgtTableName": {
 												"value": "@item().target_table",
 												"type": "Expression"
 											}
 										},
 										"LoadUpsert": {
-											"SrcTableName": {
+											"TgtTableName": {
 												"value": "@item().target_table",
 												"type": "Expression"
 											}
 										},
 										"LoadUpdate": {
-											"SrcTableName": {
+											"TgtTableName": {
 												"value": "@item().target_table",
 												"type": "Expression"
 											}
