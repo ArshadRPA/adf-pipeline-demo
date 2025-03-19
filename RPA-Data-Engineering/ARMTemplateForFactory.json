@@ -1522,7 +1522,7 @@
 												"TargetTables": {
 													"SrcTableName": "arshad.website_traffic_stg"
 												},
-												"LoadInsert": {
+												"LoadUpsert": {
 													"SrcTableName": "arshad.website_traffic_stg"
 												},
 												"LoadUpdate": {
@@ -2859,7 +2859,7 @@
 								"referenceName": "TGT_PGSQL",
 								"type": "DatasetReference"
 							},
-							"name": "LoadInsert"
+							"name": "LoadUpsert"
 						},
 						{
 							"dataset": {
@@ -2959,7 +2959,7 @@
 						"     upsertable:false,",
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> LoadInsert",
+						"     skipDuplicateMapOutputs: true) ~> LoadUpsert",
 						"UpdateIf sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     deletable:false,",
