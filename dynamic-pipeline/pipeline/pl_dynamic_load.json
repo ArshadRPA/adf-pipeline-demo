@@ -373,7 +373,16 @@
 								"dataflow": {
 									"referenceName": "df_scd_1",
 									"type": "DataFlowReference",
+									"parameters": {
+										"scd1_primary_key_column": {
+											"value": "'@{variables('scd1_primary_key_column')}'",
+											"type": "Expression"
+										}
+									},
 									"datasetParameters": {
+										"SourceTables": {
+											"SrcTableName": "arshad.website_traffic_stg"
+										},
 										"TargetTable": {
 											"SrcTableName": "arshad.website_traffic_stg"
 										}
@@ -465,6 +474,10 @@
 									},
 									"partitionOption": "None"
 								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
+								},
 								"firstRowOnly": false
 							}
 						},
@@ -519,6 +532,10 @@
 										"type": "Expression"
 									},
 									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
 								}
 							}
 						},
@@ -549,6 +566,10 @@
 										"type": "Expression"
 									},
 									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
 								},
 								"firstRowOnly": false
 							}
@@ -1651,6 +1672,10 @@
 									},
 									"partitionOption": "None"
 								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
+								},
 								"firstRowOnly": false
 							}
 						},
@@ -1779,6 +1804,10 @@
 									},
 									"partitionOption": "None"
 								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
+								},
 								"firstRowOnly": false
 							}
 						},
@@ -1803,6 +1832,10 @@
 									},
 									"partitionOption": "None"
 								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
+								},
 								"firstRowOnly": false
 							}
 						},
@@ -1826,6 +1859,10 @@
 										"type": "Expression"
 									},
 									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
 								},
 								"firstRowOnly": false
 							}
@@ -1922,6 +1959,10 @@
 										"type": "Expression"
 									},
 									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "LOOKUP_PGSQL",
+									"type": "DatasetReference"
 								},
 								"firstRowOnly": false
 							}
