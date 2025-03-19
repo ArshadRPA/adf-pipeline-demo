@@ -38,7 +38,11 @@
 				"precision": 0,
 				"scale": 0
 			}
-		]
+		],
+		"typeProperties": {
+			"schema": "arshad",
+			"table": "master_table_inc_load"
+		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }
