@@ -1438,7 +1438,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "df_dynamic_load",
+									"referenceName": "df_scd_2",
 									"type": "DataFlowReference",
 									"parameters": {
 										"scd2_timestamp_column_name": {
@@ -1472,7 +1472,7 @@
 										"TargetTables": {
 											"SrcTableName": "arshad.website_traffic_stg"
 										},
-										"LoadInsert": {
+										"LoadUpsert": {
 											"SrcTableName": "arshad.website_traffic_stg"
 										},
 										"LoadUpdate": {
