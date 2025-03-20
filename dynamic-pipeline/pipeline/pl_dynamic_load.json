@@ -206,6 +206,12 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "scd1_end_time",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"policy": {
@@ -974,6 +980,12 @@
 							"dependsOn": [
 								{
 									"activity": "inc_error_details",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "inc_end_time",
 									"dependencyConditions": [
 										"Succeeded"
 									]
