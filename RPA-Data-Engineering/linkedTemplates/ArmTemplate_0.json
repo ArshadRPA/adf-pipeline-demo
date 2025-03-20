@@ -1545,7 +1545,7 @@
 								"value": "@activity('filter_inc_load').output.value",
 								"type": "Expression"
 							},
-							"isSequential": true,
+							"isSequential": false,
 							"activities": [
 								{
 									"name": "incremental_load",
