@@ -1017,9 +1017,15 @@
 									"type": "Copy",
 									"dependsOn": [
 										{
-											"activity": "scd_1",
+											"activity": "scd1_error_details",
 											"dependencyConditions": [
-												"Failed"
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd1_end_time",
+											"dependencyConditions": [
+												"Succeeded"
 											]
 										}
 									],
@@ -1796,9 +1802,15 @@
 									"type": "Copy",
 									"dependsOn": [
 										{
-											"activity": "incremental_load",
+											"activity": "inc_error_details",
 											"dependencyConditions": [
-												"Failed"
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "inc_end_time",
+											"dependencyConditions": [
+												"Succeeded"
 											]
 										}
 									],
@@ -2142,6 +2154,12 @@
 									"dependsOn": [
 										{
 											"activity": "scd2_error_details",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_end_time",
 											"dependencyConditions": [
 												"Succeeded"
 											]
