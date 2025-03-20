@@ -36,7 +36,7 @@
 				"     inferDriftedColumnTypes: true,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> SourceTables",
-				"SourceTables alterRow(upsertIf(1==1)) ~> Upsert",
+				"SourceTables alterRow(upsertIf(true())) ~> Upsert",
 				"Upsert sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     deletable:false,",
@@ -45,7 +45,6 @@
 				"     upsertable:true,",
 				"     keys:[($scd1_primary_key_column)],",
 				"     format: 'table',",
-				"     batchSize: 3,",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> TargetTable"
 			]
