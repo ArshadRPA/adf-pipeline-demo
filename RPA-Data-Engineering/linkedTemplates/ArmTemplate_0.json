@@ -603,6 +603,65 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/df_scd_1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "SCR_PGSQL",
+								"type": "DatasetReference"
+							},
+							"name": "SourceTables"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "TGT_PGSQL",
+								"type": "DatasetReference"
+							},
+							"name": "TargetTable",
+							"description": "ETaxport data to TGT_PGSQL"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Upsert"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     scd1_primary_key_column as string",
+						"}",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     inferDriftedColumnTypes: true,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> SourceTables",
+						"SourceTables alterRow(upsertIf(true())) ~> Upsert",
+						"Upsert sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:false,",
+						"     upsertable:true,",
+						"     keys:[($scd1_primary_key_column)],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> TargetTable"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SCR_PGSQL')]",
+				"[concat(variables('factoryId'), '/datasets/TGT_PGSQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_scd_2')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -741,66 +800,6 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> LoadUpdate"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SCR_PGSQL')]",
-				"[concat(variables('factoryId'), '/datasets/TGT_PGSQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_scd_1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "SCR_PGSQL",
-								"type": "DatasetReference"
-							},
-							"name": "SourceTables"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "TGT_PGSQL",
-								"type": "DatasetReference"
-							},
-							"name": "TargetTable",
-							"description": "ETaxport data to TGT_PGSQL"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Upsert"
-						}
-					],
-					"scriptLines": [
-						"parameters{",
-						"     scd1_primary_key_column as string",
-						"}",
-						"source(allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     inferDriftedColumnTypes: true,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> SourceTables",
-						"SourceTables alterRow(upsertIf(1==1)) ~> Upsert",
-						"Upsert sink(allowSchemaDrift: true,",
-						"     validateSchema: true,",
-						"     deletable:false,",
-						"     insertable:false,",
-						"     updateable:false,",
-						"     upsertable:true,",
-						"     keys:[($scd1_primary_key_column)],",
-						"     format: 'table',",
-						"     batchSize: 3,",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> TargetTable"
 					]
 				}
 			},
@@ -1210,8 +1209,7 @@
 														"type": "Expression"
 													}
 												}
-											},
-											"linkedServiceParameters": {}
+											}
 										},
 										"staging": {},
 										"compute": {
@@ -2324,8 +2322,7 @@
 														"type": "Expression"
 													}
 												}
-											},
-											"linkedServiceParameters": {}
+											}
 										},
 										"staging": {},
 										"compute": {
