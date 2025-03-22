@@ -760,7 +760,7 @@
 							"typeProperties": {
 								"variableName": "scd1_after_row_counts_target_table",
 								"value": {
-									"value": "@activity('scd1_lookup_after_row_counts').output.value[0].after_total_rows",
+									"value": "@activity('scd1_lookup_after_row_counts').output.firstRow.after_total_rows",
 									"type": "Expression"
 								}
 							}
