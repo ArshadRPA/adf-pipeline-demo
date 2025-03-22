@@ -2920,7 +2920,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select \n'@{variables('scd2_code_name')}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{variables('scd2_target_table_name')}' as target_table_name,\n'@{variables('scd2_source_file_name')}' as source_file_name,\n'@{variables('scd2_end_time')}' as execution_time,\n'@{variables('scd2_error_details')}' as error_details;",
+												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd2_end_time')}' as execution_time,\n'@{variables('scd2_error_details')}' as error_details;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -3121,8 +3121,7 @@
 												"LoadUpdate": {
 													"TgtTableName": "@item().target_table"
 												}
-											},
-											"linkedServiceParameters": {}
+											}
 										},
 										"staging": {},
 										"compute": {
