@@ -1671,7 +1671,7 @@
 									}
 								},
 								{
-									"name": "lookup_before_row_counts",
+									"name": "inc_lookup_before_row_counts",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -1705,7 +1705,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "lookup_before_row_counts",
+											"activity": "inc_lookup_before_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1719,7 +1719,7 @@
 									"typeProperties": {
 										"variableName": "inc_before_row_counts",
 										"value": {
-											"value": "@activity('lookup_before_row_counts').output.firstRow.before_total_rows\n",
+											"value": "@activity('inc_lookup_before_row_counts').output.firstRow.before_total_rows\n",
 											"type": "Expression"
 										}
 									}
