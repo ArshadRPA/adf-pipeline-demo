@@ -44,7 +44,9 @@
 							"dataset": {
 								"referenceName": "LOOKUP_PGSQL",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"table_name": "arshad.master_table"
+								}
 							},
 							"firstRowOnly": false
 						}
@@ -3030,6 +3032,11 @@
 					"referenceName": "AzurePostgreSql",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "AzurePostgreSqlTable",
 				"schema": [
@@ -3064,10 +3071,7 @@
 						"scale": 0
 					}
 				],
-				"typeProperties": {
-					"schema": "arshad",
-					"table": "master_table"
-				}
+				"typeProperties": {}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzurePostgreSql')]"
