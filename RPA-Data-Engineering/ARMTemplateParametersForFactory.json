@@ -6,7 +6,7 @@
 			"value": "RPA-Data-Engineering"
 		},
 		"AzurePostgreSql_connectionString": {
-			"value": "Host=;Port=;Database=;UID=;EncryptionMethod=0"
+			"value": ""
 		}
 	}
 }

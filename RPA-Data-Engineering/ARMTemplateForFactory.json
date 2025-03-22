@@ -9,8 +9,7 @@
 		},
 		"AzurePostgreSql_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql'",
-			"defaultValue": "Host=;Port=;Database=;UID=;EncryptionMethod=0"
+			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql'"
 		}
 	},
 	"variables": {
