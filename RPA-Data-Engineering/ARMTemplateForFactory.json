@@ -1782,19 +1782,19 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_target_pk",
+											"activity": "scd2_lookup_status_column",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "scd2_source_pk",
+											"activity": "scd2_lookup_source_pk",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "scd2_status_column",
+											"activity": "scd2_lookup_target_pk",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1917,7 +1917,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd2_start_time')}' as start_time,\n'@{variables('scd2_end_time')}' as end_time,\n'@{variables('scd2_source_file_name')}' as source_file_name,\n'@{variables('scd2_target_table_name')}' as target_table_name,\n'@{variables('scd2_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd2_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd2_updated_row_count')}' as updated_row_count,\n'@{variables('scd2_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd2_start_time')}' as last_pulled_time;",
+												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd2_start_time')}' as start_time,\n'@{variables('scd2_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd2_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd2_updated_row_count')}' as updated_row_count,\n'@{variables('scd2_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd2_start_time')}' as last_pulled_time;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -2120,12 +2120,6 @@
 											"dependencyConditions": [
 												"Succeeded"
 											]
-										},
-										{
-											"activity": "scd2_end_time",
-											"dependencyConditions": [
-												"Succeeded"
-											]
 										}
 									],
 									"policy": {
@@ -2316,15 +2310,15 @@
 													"type": "Expression"
 												},
 												"scd2_source_pk": {
-													"value": "'@{variables('scd2_source_pk')}'",
+													"value": "'@{activity('scd2_lookup_source_pk').output.value[0].source_pk}'",
 													"type": "Expression"
 												},
 												"scd2_target_pk": {
-													"value": "'@{variables('scd2_target_pk')}'",
+													"value": "'@{activity('scd2_lookup_target_pk').output.value[0].target_pk}'",
 													"type": "Expression"
 												},
 												"scd2_status_column": {
-													"value": "'@{variables('scd2_status_column')}'",
+													"value": "'@{activity('scd2_lookup_status_column').output.value[0].status_column}'",
 													"type": "Expression"
 												}
 											},
@@ -2408,7 +2402,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT COUNT(*) AS after_total_rows\nFROM @{variables('scd2_target_table_name')};",
+												"value": "SELECT COUNT(*) AS after_total_rows\nFROM @{item().target_table};",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -2581,78 +2575,6 @@
 											}
 										},
 										"firstRowOnly": false
-									}
-								},
-								{
-									"name": "scd2_status_column",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_lookup_status_column",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_status_column",
-										"value": {
-											"value": "@activity('scd2_lookup_status_column').output.value[0].status_column",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_target_pk",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_lookup_target_pk",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_target_pk",
-										"value": {
-											"value": "@activity('scd2_lookup_target_pk').output.value[0].target_pk",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_source_pk",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_lookup_source_pk",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_source_pk",
-										"value": {
-											"value": "@activity('scd2_lookup_source_pk').output.value[0].source_pk",
-											"type": "Expression"
-										}
 									}
 								},
 								{
@@ -3678,18 +3600,20 @@
 						"UpsertIf sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     deletable:false,",
-						"     insertable:true,",
+						"     insertable:false,",
 						"     updateable:false,",
-						"     upsertable:false,",
+						"     upsertable:true,",
+						"     keys:[($scd2_target_pk),($scd2_timestamp_column)],",
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> LoadUpsert",
 						"UpdateIf sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
 						"     upsertable:false,",
+						"     keys:[($scd2_target_pk),($scd2_timestamp_column)],",
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> LoadUpdate"
