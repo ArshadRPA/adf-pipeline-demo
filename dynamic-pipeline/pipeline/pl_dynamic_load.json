@@ -1888,7 +1888,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd2_start_time')}' as start_time,\n'@{variables('scd2_end_time')}' as end_time,\n'@{variables('scd2_source_file_name')}' as source_file_name,\n'@{variables('scd2_target_table_name')}' as target_table_name,\n'@{variables('scd2_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd2_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd2_updated_row_count')}' as updated_row_count,\n'@{variables('scd2_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd2_start_time')}' as last_pulled_time;",
+										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd2_start_time')}' as start_time,\n'@{variables('scd2_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd2_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd2_updated_row_count')}' as updated_row_count,\n'@{variables('scd2_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd2_start_time')}' as last_pulled_time;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
