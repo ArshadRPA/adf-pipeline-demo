@@ -2373,7 +2373,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "SELECT COUNT(*) AS after_total_rows\nFROM @{variables('scd2_target_table_name')};",
+										"value": "SELECT COUNT(*) AS after_total_rows\nFROM @i{tem().target_table};",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
