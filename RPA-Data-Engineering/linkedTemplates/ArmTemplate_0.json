@@ -76,7 +76,7 @@
 				],
 				"typeProperties": {
 					"schema": "arshad",
-					"table": "master_table_inc_load"
+					"table": "master_table"
 				}
 			},
 			"dependsOn": [
