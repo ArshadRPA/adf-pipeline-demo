@@ -115,7 +115,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "after_row_counts_target_table",
+											"activity": "scd1_after_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -648,7 +648,7 @@
 											]
 										},
 										{
-											"activity": "before_row_counts_target_table",
+											"activity": "scd1_before_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -755,7 +755,7 @@
 									}
 								},
 								{
-									"name": "lookup_delta_records",
+									"name": "scd1_lookup_delta_records",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -789,11 +789,11 @@
 									}
 								},
 								{
-									"name": "before_row_counts_target_table",
+									"name": "scd1_before_row_counts",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "lookup_before_row_count_target_table",
+											"activity": "scd1_lookup_before_row_count",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -807,17 +807,17 @@
 									"typeProperties": {
 										"variableName": "scd1_before_row_counts_target_table",
 										"value": {
-											"value": "@activity('lookup_before_row_count_target_table').output.firstRow.before_total_rows\n",
+											"value": "@activity('scd1_lookup_before_row_count').output.firstRow.before_total_rows\n",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "lookup_before_row_count_target_table",
+									"name": "scd1_lookup_before_row_count",
 									"type": "Lookup",
 									"dependsOn": [
 										{
-											"activity": "count_delta_records",
+											"activity": "scd1_count_delta_records",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -850,7 +850,7 @@
 									}
 								},
 								{
-									"name": "lookup_after_row_counts",
+									"name": "scd1_lookup_after_row_counts",
 									"type": "Lookup",
 									"dependsOn": [
 										{
@@ -888,11 +888,11 @@
 									}
 								},
 								{
-									"name": "after_row_counts_target_table",
+									"name": "scd1_after_row_counts",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "lookup_after_row_counts",
+											"activity": "scd1_lookup_after_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -906,17 +906,17 @@
 									"typeProperties": {
 										"variableName": "scd1_after_row_counts_target_table",
 										"value": {
-											"value": "@activity('lookup_after_row_counts').output.value[0].after_total_rows",
+											"value": "@activity('scd1_lookup_after_row_counts').output.value[0].after_total_rows",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "count_delta_records",
+									"name": "scd1_count_delta_records",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "lookup_delta_records",
+											"activity": "scd1_lookup_delta_records",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -930,7 +930,7 @@
 									"typeProperties": {
 										"variableName": "scd1_delta_records",
 										"value": {
-											"value": "@activity('lookup_delta_records').output.value[0].count\n",
+											"value": "@activity('scd1_lookup_delta_records').output.value[0].count\n",
 											"type": "Expression"
 										}
 									}
