@@ -1124,54 +1124,6 @@
 							}
 						},
 						{
-							"name": "inc_insreted_row_count",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "incremental_load",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_inserted_row_count",
-								"value": {
-									"value": "@activity('incremental_load').output.rowsCopied\n",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "inc_error_details",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "incremental_load",
-									"dependencyConditions": [
-										"Failed"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_error_details",
-								"value": {
-									"value": "@replace(activity('incremental_load').Error.Message, '''', '''''')",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "inc_audit_table",
 							"type": "Copy",
 							"dependsOn": [
@@ -1203,7 +1155,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{activity('incremental_load').output.rowsCopied}' as inserted_row_count,\n'@{activity('inc_lookup_before_row_counts').output.firstRow}' as no_change_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
+										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{activity('incremental_load').output.rowsCopied}' as inserted_row_count,\n'@{activity('inc_lookup_before_row_counts').output.firstRow.before_total_rows}' as no_change_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -1388,9 +1340,9 @@
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "inc_error_details",
+									"activity": "incremental_load",
 									"dependencyConditions": [
-										"Succeeded"
+										"Failed"
 									]
 								}
 							],
@@ -1415,7 +1367,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{replace(activity('incremental_load').Error.Message, '''', '''''')}' as execution_time,\n'@{variables('inc_error_details')}' as error_details;",
+										"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{variables('inc_start_time')}' as execution_time,\n'@{replace(activity('incremental_load').Error.Message, '''', '''''')}' as error_details;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -2584,6 +2536,9 @@
 			},
 			"scd2_md5_columns": {
 				"type": "String"
+			},
+			"inc_before_row_count": {
+				"type": "Integer"
 			}
 		},
 		"annotations": [],
