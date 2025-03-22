@@ -2590,7 +2590,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "scd2_target_pk",
-								"value": "@activity('scd2_lookup_source_pk').output.value[0].source_pk"
+								"value": {
+									"value": "@activity('scd2_lookup_target_pk').output.value[0].target_pk",
+									"type": "Expression"
+								}
 							}
 						},
 						{
