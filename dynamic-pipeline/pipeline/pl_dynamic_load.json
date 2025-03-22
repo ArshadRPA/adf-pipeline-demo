@@ -1765,7 +1765,7 @@
 									]
 								},
 								{
-									"activity": "scd2_active_column_name",
+									"activity": "scd2_status_column",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2443,7 +2443,7 @@
 							}
 						},
 						{
-							"name": "scd2_lookup_target_primary_key",
+							"name": "scd2_lookup_pk_status_columns",
 							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
@@ -2549,11 +2549,11 @@
 							}
 						},
 						{
-							"name": "scd2_active_column_name",
+							"name": "scd2_status_column",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "scd2_lookup_target_primary_key",
+									"activity": "scd2_lookup_pk_status_columns",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2567,7 +2567,7 @@
 							"typeProperties": {
 								"variableName": "scd2_status_column",
 								"value": {
-									"value": "@activity('scd2_lookup_active_column_name').output.value[0].active_column_name",
+									"value": "@activity('scd2_lookup_pk_status_columns').output.value[2].active_column_name",
 									"type": "Expression"
 								}
 							}
@@ -2577,7 +2577,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "scd2_lookup_target_primary_key",
+									"activity": "scd2_lookup_pk_status_columns",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2591,7 +2591,7 @@
 							"typeProperties": {
 								"variableName": "scd2_target_pk",
 								"value": {
-									"value": "@activity('scd2_lookup_target_primary_key').output.value[0].primary_key_column",
+									"value": "@activity('scd2_lookup_pk_status_columns').output.value[1].primary_key_column",
 									"type": "Expression"
 								}
 							}
@@ -2601,7 +2601,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "scd2_lookup_target_primary_key",
+									"activity": "scd2_lookup_pk_status_columns",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2615,7 +2615,7 @@
 							"typeProperties": {
 								"variableName": "scd2_source_pk",
 								"value": {
-									"value": "@activity('scd2_lookup_source_primary_key').output.value[0].primary_key_column",
+									"value": "@activity('scd2_lookup_pk_status_columns').output.value[0].primary_key_column",
 									"type": "Expression"
 								}
 							}
