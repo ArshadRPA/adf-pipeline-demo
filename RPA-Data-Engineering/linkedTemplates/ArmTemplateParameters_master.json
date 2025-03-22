@@ -5,17 +5,8 @@
 		"factoryName": {
 			"value": "RPA-Data-Engineering"
 		},
-		"AzurePostgreSql_password": {
-			"value": ""
-		},
-		"AzurePostgreSql_properties_typeProperties_server": {
-			"value": "4.213.177.85"
-		},
-		"AzurePostgreSql_properties_typeProperties_database": {
-			"value": "cms"
-		},
-		"AzurePostgreSql_properties_typeProperties_username": {
-			"value": "app_user"
+		"AzurePostgreSql_connectionString": {
+			"value": "Host=;Port=;Database=;UID=;EncryptionMethod=0"
 		},
 		"containerUri": {
 			"value": ""

@@ -7,21 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "RPA-Data-Engineering"
 		},
-		"AzurePostgreSql_password": {
+		"AzurePostgreSql_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'AzurePostgreSql'"
-		},
-		"AzurePostgreSql_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "4.213.177.85"
-		},
-		"AzurePostgreSql_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "cms"
-		},
-		"AzurePostgreSql_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "app_user"
+			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql'",
+			"defaultValue": "Host=;Port=;Database=;UID=;EncryptionMethod=0"
 		}
 	},
 	"variables": {
@@ -35,17 +24,9 @@
 			"properties": {
 				"annotations": [],
 				"type": "AzurePostgreSql",
-				"version": "2.0",
+				"version": "1.0",
 				"typeProperties": {
-					"server": "[parameters('AzurePostgreSql_properties_typeProperties_server')]",
-					"port": 5432,
-					"database": "[parameters('AzurePostgreSql_properties_typeProperties_database')]",
-					"sslMode": 2,
-					"username": "[parameters('AzurePostgreSql_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('AzurePostgreSql_password')]"
-					}
+					"connectionString": "[parameters('AzurePostgreSql_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -815,7 +796,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "LookupFileNames",
+						"name": "lookup_master_table",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -829,7 +810,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzurePostgreSqlSource",
-								"query": "select source_table, target_table, timestamp_column_name, primary_key_column, load_type, all_column_names from arshad.master_table_inc_load where status=true;",
+								"query": "select source_table, target_table, timestamp_column_name, primary_key_column, load_type, md5_columns from arshad.master_table where status=true;",
 								"partitionOption": "None"
 							},
 							"dataset": {
@@ -841,7 +822,7 @@
 						}
 					},
 					{
-						"name": "scd1_LoopForEachTable",
+						"name": "scd1_loop",
 						"type": "ForEach",
 						"dependsOn": [
 							{
@@ -979,6 +960,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzurePostgreSqlSource",
+											"query": {
+												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd1_start_time')}' as start_time,\n'@{variables('scd1_end_time')}' as end_time,\n'@{variables('scd1_source_file_name')}' as source_file_name,\n'@{variables('scd1_target_table_name')}' as target_table_name,\n'@{variables('scd1_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd1_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd1_updated_row_count')}' as updated_row_count,\n'@{variables('scd1_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd1_start_time')}' as last_pulled_time;",
+												"type": "Expression"
+											},
 											"partitionOption": "None"
 										},
 										"sink": {
@@ -990,6 +975,164 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "start_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "start_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "end_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "end_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "inserted_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "inserted_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "updated_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "updated_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "no_change_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "no_change_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "last_pulled_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "last_pulled_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -1064,6 +1207,104 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "execution_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "execution_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -1087,7 +1328,7 @@
 									]
 								},
 								{
-									"name": "scd1_SourceTableName",
+									"name": "scd1_source_table_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1104,7 +1345,7 @@
 									}
 								},
 								{
-									"name": "scd1_TargetTableName",
+									"name": "scd1_target_table_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1148,13 +1389,13 @@
 											]
 										},
 										{
-											"activity": "scd1_SourceTableName",
+											"activity": "scd1_source_table_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "scd1_TargetTableName",
+											"activity": "scd1_target_table_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1166,7 +1407,7 @@
 											]
 										},
 										{
-											"activity": "scd1_TimestampColumnName",
+											"activity": "scd1_timestamp_column_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1198,7 +1439,7 @@
 											"type": "DataFlowReference",
 											"parameters": {
 												"scd1_primary_key_column": {
-													"value": "'@{item().primary_key_column}'",
+													"value": "'@{variables('scd1_primary_key_column')}'",
 													"type": "Expression"
 												}
 											},
@@ -1222,11 +1463,12 @@
 											"coreCount": 8,
 											"computeType": "General"
 										},
-										"traceLevel": "Fine"
+										"traceLevel": "Fine",
+										"runConcurrently": true
 									}
 								},
 								{
-									"name": "scd1_TimestampColumnName",
+									"name": "scd1_timestamp_column_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1284,7 +1526,7 @@
 									}
 								},
 								{
-									"name": "LookupDeltaRecords",
+									"name": "lookup_delta_records",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -1305,9 +1547,14 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": {
+													"value": "@item().target_table",
+													"type": "Expression"
+												}
+											}
 										},
 										"firstRowOnly": false
 									}
@@ -1317,7 +1564,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "LookupBeforeRowCounts",
+											"activity": "lookup_before_row_count_target_table",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1331,13 +1578,13 @@
 									"typeProperties": {
 										"variableName": "scd1_before_row_counts_target_table",
 										"value": {
-											"value": "@activity('LookupBeforeRowCounts').output.firstRow.before_total_rows\n",
+											"value": "@activity('lookup_before_row_count_target_table').output.firstRow.before_total_rows\n",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "LookupBeforeRowCounts",
+									"name": "lookup_before_row_count_target_table",
 									"type": "Lookup",
 									"dependsOn": [
 										{
@@ -1365,14 +1612,16 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": "@item().target_table"
+											}
 										}
 									}
 								},
 								{
-									"name": "LookupAfterRowCounts",
+									"name": "lookup_after_row_counts",
 									"type": "Lookup",
 									"dependsOn": [
 										{
@@ -1400,9 +1649,11 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": "@item().target_table"
+											}
 										},
 										"firstRowOnly": false
 									}
@@ -1412,7 +1663,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "LookupAfterRowCounts",
+											"activity": "lookup_after_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1426,7 +1677,7 @@
 									"typeProperties": {
 										"variableName": "scd1_after_row_counts_target_table",
 										"value": {
-											"value": "@activity('LookupAfterRowCounts').output.value[0].after_total_rows",
+											"value": "@activity('lookup_after_row_counts').output.value[0].after_total_rows",
 											"type": "Expression"
 										}
 									}
@@ -1436,7 +1687,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "LookupDeltaRecords",
+											"activity": "lookup_delta_records",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1450,7 +1701,7 @@
 									"typeProperties": {
 										"variableName": "scd1_delta_records",
 										"value": {
-											"value": "@activity('LookupDeltaRecords').output.value[0].count\n",
+											"value": "@activity('lookup_delta_records').output.value[0].count\n",
 											"type": "Expression"
 										}
 									}
@@ -1487,7 +1738,7 @@
 						"type": "Filter",
 						"dependsOn": [
 							{
-								"activity": "LookupFileNames",
+								"activity": "lookup_master_table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1496,7 +1747,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupFileNames').output.value",
+								"value": "@activity('lookup_master_table').output.value",
 								"type": "Expression"
 							},
 							"condition": {
@@ -1510,7 +1761,7 @@
 						"type": "Filter",
 						"dependsOn": [
 							{
-								"activity": "LookupFileNames",
+								"activity": "lookup_master_table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1519,7 +1770,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupFileNames').output.value",
+								"value": "@activity('lookup_master_table').output.value",
 								"type": "Expression"
 							},
 							"condition": {
@@ -1529,7 +1780,7 @@
 						}
 					},
 					{
-						"name": "inc_LoopForEachTablesIncLoad",
+						"name": "incremental_loop",
 						"type": "ForEach",
 						"dependsOn": [
 							{
@@ -1545,7 +1796,7 @@
 								"value": "@activity('filter_inc_load').output.value",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "incremental_load",
@@ -1558,19 +1809,19 @@
 											]
 										},
 										{
-											"activity": "inc_SourceTableName",
+											"activity": "inc_source_table_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "inc_TargetTableName",
+											"activity": "inc_target_table_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "inc_TimestampColumnName",
+											"activity": "inc_timestamp_column_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1643,7 +1894,14 @@
 								{
 									"name": "inc_start_time",
 									"type": "SetVariable",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "inc_before_row_counts_target_table",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -1761,7 +2019,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{variables('inc_source_file_name')}' as source_file_name,\n'@{variables('inc_target_table_name')}' as target_table_name,\n'@{variables('inc_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('inc_inserted_row_count')}' as inserted_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
+												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{variables('inc_source_file_name')}' as source_file_name,\n'@{variables('inc_target_table_name')}' as target_table_name,\n'@{variables('inc_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('inc_inserted_row_count')}' as inserted_row_count,\n'@{variables('inc_before_row_counts')}' as no_change_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -1775,6 +2033,152 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "start_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "start_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "end_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "end_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "inserted_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "inserted_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "no_change_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "no_change_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "last_pulled_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "last_pulled_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -1849,6 +2253,104 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "execution_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "execution_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -1872,7 +2374,7 @@
 									]
 								},
 								{
-									"name": "inc_SourceTableName",
+									"name": "inc_source_table_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1889,7 +2391,7 @@
 									}
 								},
 								{
-									"name": "inc_TargetTableName",
+									"name": "inc_target_table_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1906,7 +2408,7 @@
 									}
 								},
 								{
-									"name": "inc_TimestampColumnName",
+									"name": "inc_timestamp_column_name",
 									"type": "SetVariable",
 									"dependsOn": [],
 									"policy": {
@@ -1938,6 +2440,60 @@
 											"type": "Expression"
 										}
 									}
+								},
+								{
+									"name": "lookup_before_row_counts",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzurePostgreSqlSource",
+											"query": {
+												"value": "SELECT COUNT(*) AS before_total_rows FROM @{item().target_table}\n",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "TGT_PGSQL",
+											"type": "DatasetReference",
+											"parameters": {
+												"TgtTableName": "@item().target_table"
+											}
+										}
+									}
+								},
+								{
+									"name": "inc_before_row_counts_target_table",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "lookup_before_row_counts",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "inc_before_row_counts",
+										"value": {
+											"value": "@activity('lookup_before_row_counts').output.firstRow.before_total_rows\n",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -1947,7 +2503,7 @@
 						"type": "Filter",
 						"dependsOn": [
 							{
-								"activity": "LookupFileNames",
+								"activity": "lookup_master_table",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1956,7 +2512,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupFileNames').output.value",
+								"value": "@activity('lookup_master_table').output.value",
 								"type": "Expression"
 							},
 							"condition": {
@@ -1966,7 +2522,7 @@
 						}
 					},
 					{
-						"name": "scd2_LoopForEachTable",
+						"name": "scd2_loop",
 						"type": "ForEach",
 						"dependsOn": [
 							{
@@ -1987,14 +2543,7 @@
 								{
 									"name": "scd2_start_time",
 									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_SourceTableName",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -2126,6 +2675,164 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "start_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "start_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "end_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "end_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "inserted_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "inserted_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "updated_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "updated_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "no_change_row_count",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "no_change_row_count",
+														"type": "Int32",
+														"physicalType": "integer"
+													}
+												},
+												{
+													"source": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "status",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "last_pulled_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "last_pulled_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -2200,6 +2907,104 @@
 										"enableStaging": false,
 										"translator": {
 											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "code_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "run_id",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_system",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "schema_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "target_table_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "source_file_name",
+														"type": "String",
+														"physicalType": "text"
+													}
+												},
+												{
+													"source": {
+														"name": "execution_time",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "execution_time",
+														"type": "DateTime",
+														"physicalType": "timestamp without time zone"
+													}
+												},
+												{
+													"source": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													},
+													"sink": {
+														"name": "error_details",
+														"type": "String",
+														"physicalType": "text"
+													}
+												}
+											],
 											"typeConversion": true,
 											"typeConversionSettings": {
 												"allowDataTruncation": true,
@@ -2223,16 +3028,9 @@
 									]
 								},
 								{
-									"name": "scd2_SourceTableName",
+									"name": "scd2_source_table_name",
 									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_code_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -2247,16 +3045,9 @@
 									}
 								},
 								{
-									"name": "scd2_TargetTableName",
+									"name": "scd2_target_table_name",
 									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_code_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -2279,6 +3070,30 @@
 											"dependencyConditions": [
 												"Succeeded"
 											]
+										},
+										{
+											"activity": "scd2_code_name",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_timestamp_column_name",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_target_table_name",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_source_table_name",
+											"dependencyConditions": [
+												"Succeeded"
+											]
 										}
 									],
 									"policy": {
@@ -2295,23 +3110,23 @@
 											"type": "DataFlowReference",
 											"parameters": {
 												"scd2_timestamp_column_name": {
-													"value": "'@{item().timestamp_column_name}'",
+													"value": "'@{variables('scd2_timestamp_column_name')}'",
 													"type": "Expression"
 												},
 												"scd2_all_column_names": {
-													"value": "@variables('scd2_all_column_names_array')",
+													"value": "@variables('scd2_md5_columns_array')",
 													"type": "Expression"
 												},
 												"scd2_source_primary_key": {
-													"value": "'@{activity('scd2_source_primary_key').output.value[0].primary_key_column}'",
+													"value": "'@{variables('scd2_source_pk')}'",
 													"type": "Expression"
 												},
 												"scd2_target_primary_key": {
-													"value": "'@{activity('scd2_target_primary_key').output.value[0].primary_key_column}'",
+													"value": "'@{variables('scd2_target_pk')}'",
 													"type": "Expression"
 												},
 												"scd2_active_column": {
-													"value": "'@{activity('scd2_Lookup_active_columns').output.value[0].active_column_name}'",
+													"value": "'@{variables('scd2_status_column')}'",
 													"type": "Expression"
 												}
 											},
@@ -2335,10 +3150,7 @@
 													}
 												},
 												"LoadUpdate": {
-													"TgtTableName": {
-														"value": "@item().target_table",
-														"type": "Expression"
-													}
+													"TgtTableName": "@item().target_table"
 												}
 											}
 										},
@@ -2351,16 +3163,9 @@
 									}
 								},
 								{
-									"name": "scd2_TimestampColumnName",
+									"name": "scd2_timestamp_column_name",
 									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_code_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -2391,19 +3196,13 @@
 											]
 										},
 										{
-											"activity": "scd2_count_delta_records",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
 											"activity": "scd2_active_column_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
 										},
 										{
-											"activity": "scd2_all_column_names_array",
+											"activity": "scd2_md5_columns_in_array",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2447,77 +3246,7 @@
 									}
 								},
 								{
-									"name": "scd2_LookupDeltaRecords",
-									"type": "Lookup",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzurePostgreSqlSource",
-											"query": {
-												"value": "SELECT COUNT(*) AS count\nFROM @{variables('scd2_source_file_name')}\nWHERE @{variables('scd2_timestamp_column_name')} > (\n    SELECT COALESCE(MAX(@{variables('scd2_timestamp_column_name')}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{variables('scd2_target_table_name')}\n);",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"firstRowOnly": false
-									}
-								},
-								{
-									"name": "scd2_before_row_counts_target_table",
-									"type": "SetVariable",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_before_row_counts_target_table",
-										"value": {
-											"value": "@activity('scd2_LookupBeforeRowCounts').output.firstRow.before_total_rows\n",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_LookupBeforeRowCounts",
-									"type": "Lookup",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzurePostgreSqlSource",
-											"query": {
-												"value": "SELECT COUNT(*) AS before_total_rows FROM @{item().target_table}\n",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										}
-									}
-								},
-								{
-									"name": "scd2_LookupAfterRowCounts",
+									"name": "scd2_lookup_after_row_counts",
 									"type": "Lookup",
 									"dependsOn": [
 										{
@@ -2545,9 +3274,11 @@
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": "@item().target_table"
+											}
 										},
 										"firstRowOnly": false
 									}
@@ -2557,7 +3288,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_LookupAfterRowCounts",
+											"activity": "scd2_lookup_after_row_counts",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2571,33 +3302,7 @@
 									"typeProperties": {
 										"variableName": "scd2_after_row_counts_target_table",
 										"value": {
-											"value": "@activity('scd2_LookupAfterRowCounts').output.value[0].after_total_rows",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_count_delta_records",
-									"type": "SetVariable",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [
-										{
-											"activity": "scd2_LookupDeltaRecords",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_delta_records",
-										"value": {
-											"value": "@activity('scd2_LookupDeltaRecords').output.value[0].count\n",
+											"value": "@activity('scd2_lookup_after_row_counts').output.value[0].after_total_rows",
 											"type": "Expression"
 										}
 									}
@@ -2633,11 +3338,11 @@
 									}
 								},
 								{
-									"name": "scd2_all_column_names_array",
+									"name": "scd2_md5_columns_in_array",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_all_column_names",
+											"activity": "scd2_md5_columns",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2649,15 +3354,15 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"variableName": "scd2_all_column_names_array",
+										"variableName": "scd2_md5_columns_array",
 										"value": {
-											"value": "@split(variables('scd2_all_column_names'), ',')",
+											"value": "@split(variables('scd2_md5_columns'), ',')",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "scd2_target_primary_key",
+									"name": "scd2_lookup_target_primary_key",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -2672,21 +3377,26 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT primary_key_column\nFROM arshad.master_table_inc_load\nWHERE target_table= '@{item().target_table}';",
+												"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": {
+													"value": "arshad.master_table",
+													"type": "Expression"
+												}
+											}
 										},
 										"firstRowOnly": false
 									}
 								},
 								{
-									"name": "scd2_source_primary_key",
+									"name": "scd2_lookup_source_primary_key",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -2701,21 +3411,26 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT primary_key_column\nFROM arshad.master_table_inc_load\nWHERE source_table= '@{item().source_table}';",
+												"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().source_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": {
+													"value": "arshad.master_table",
+													"type": "Expression"
+												}
+											}
 										},
 										"firstRowOnly": false
 									}
 								},
 								{
-									"name": "scd2_Lookup_active_columns",
+									"name": "scd2_lookup_active_column_name",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -2730,15 +3445,20 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT active_column_name\nFROM arshad.master_table_inc_load\nWHERE target_table= '@{item().target_table}';",
+												"value": "SELECT active_column_name\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": {
+													"value": "arshad.master_table",
+													"type": "Expression"
+												}
+											}
 										},
 										"firstRowOnly": false
 									}
@@ -2748,7 +3468,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_Lookup_active_columns",
+											"activity": "scd2_lookup_active_column_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2762,7 +3482,7 @@
 									"typeProperties": {
 										"variableName": "scd2_status_column",
 										"value": {
-											"value": "@activity('scd2_Lookup_active_columns').output.value[0].active_column_name",
+											"value": "@activity('scd2_lookup_active_column_name').output.value[0].active_column_name",
 											"type": "Expression"
 										}
 									}
@@ -2772,7 +3492,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_target_primary_key",
+											"activity": "scd2_lookup_target_primary_key",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2784,9 +3504,9 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"variableName": "scd_target_pk",
+										"variableName": "scd2_target_pk",
 										"value": {
-											"value": "@activity('scd2_target_primary_key').output.value[0].primary_key_column",
+											"value": "@activity('scd2_lookup_target_primary_key').output.value[0].primary_key_column",
 											"type": "Expression"
 										}
 									}
@@ -2796,7 +3516,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_source_primary_key",
+											"activity": "scd2_lookup_source_primary_key",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2810,13 +3530,13 @@
 									"typeProperties": {
 										"variableName": "scd2_source_pk",
 										"value": {
-											"value": "@activity('scd2_source_primary_key').output.value[0].primary_key_column",
+											"value": "@activity('scd2_lookup_source_primary_key').output.value[0].primary_key_column",
 											"type": "Expression"
 										}
 									}
 								},
 								{
-									"name": "scd2_Lookup_all_column_names",
+									"name": "scd2_lookup_md5_columns",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -2831,25 +3551,27 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT all_column_names\nFROM arshad.master_table_inc_load\nWHERE target_table= '@{item().target_table}';",
+												"value": "SELECT md5_columns\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
 										},
 										"dataset": {
-											"referenceName": "LOOKUP_PGSQL",
+											"referenceName": "TGT_PGSQL",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"TgtTableName": "arshad.master_table"
+											}
 										},
 										"firstRowOnly": false
 									}
 								},
 								{
-									"name": "scd2_all_column_names",
+									"name": "scd2_md5_columns",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_Lookup_all_column_names",
+											"activity": "scd2_lookup_md5_columns",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -2861,9 +3583,9 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
-										"variableName": "scd2_all_column_names",
+										"variableName": "scd2_md5_columns",
 										"value": {
-											"value": "@activity('scd2_Lookup_all_column_names').output.value[0].all_column_names",
+											"value": "@activity('scd2_lookup_md5_columns').output.value[0].md5_columns",
 											"type": "Expression"
 										}
 									}
@@ -3037,24 +3759,27 @@
 					"scd2_after_row_counts_target_table": {
 						"type": "Integer"
 					},
-					"scd2_all_column_names_array": {
+					"scd2_md5_columns_array": {
 						"type": "Array"
 					},
 					"scd2_status_column": {
 						"type": "String"
 					},
-					"scd_target_pk": {
+					"scd2_target_pk": {
 						"type": "String"
 					},
 					"scd2_source_pk": {
 						"type": "String"
 					},
-					"scd2_all_column_names": {
+					"scd2_md5_columns": {
 						"type": "String"
+					},
+					"inc_before_row_counts": {
+						"type": "Integer"
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2025-03-19T07:51:42Z"
+				"lastPublishTime": "2025-03-21T10:16:26Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/LOOKUP_PGSQL')]",
@@ -3063,8 +3788,8 @@
 				"[concat(variables('factoryId'), '/datasets/dummy_error_table')]",
 				"[concat(variables('factoryId'), '/datasets/error_table')]",
 				"[concat(variables('factoryId'), '/dataflows/df_scd_1')]",
-				"[concat(variables('factoryId'), '/datasets/SCR_PGSQL')]",
 				"[concat(variables('factoryId'), '/datasets/TGT_PGSQL')]",
+				"[concat(variables('factoryId'), '/datasets/SCR_PGSQL')]",
 				"[concat(variables('factoryId'), '/dataflows/df_scd_2')]"
 			]
 		}

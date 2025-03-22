@@ -7,21 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "RPA-Data-Engineering"
 		},
-		"AzurePostgreSql_password": {
+		"AzurePostgreSql_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'AzurePostgreSql'"
-		},
-		"AzurePostgreSql_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "4.213.177.85"
-		},
-		"AzurePostgreSql_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "cms"
-		},
-		"AzurePostgreSql_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "app_user"
+			"metadata": "Secure string for 'connectionString' of 'AzurePostgreSql'",
+			"defaultValue": "Host=;Port=;Database=;UID=;EncryptionMethod=0"
 		},
 		"containerUri": {
 			"type": "string",
@@ -50,17 +39,8 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"AzurePostgreSql_password": {
-						"value": "[parameters('AzurePostgreSql_password')]"
-					},
-					"AzurePostgreSql_properties_typeProperties_server": {
-						"value": "[parameters('AzurePostgreSql_properties_typeProperties_server')]"
-					},
-					"AzurePostgreSql_properties_typeProperties_database": {
-						"value": "[parameters('AzurePostgreSql_properties_typeProperties_database')]"
-					},
-					"AzurePostgreSql_properties_typeProperties_username": {
-						"value": "[parameters('AzurePostgreSql_properties_typeProperties_username')]"
+					"AzurePostgreSql_connectionString": {
+						"value": "[parameters('AzurePostgreSql_connectionString')]"
 					}
 				}
 			},
