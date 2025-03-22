@@ -967,8 +967,6 @@
 			{
 				"name": "filter_inc_load",
 				"type": "Filter",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "lookup_master_table",
@@ -992,8 +990,6 @@
 			{
 				"name": "incremental_loop",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_inc_load",
@@ -1019,30 +1015,6 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
-								},
-								{
-									"activity": "inc_source_table_name",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "inc_target_table_name",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "inc_timestamp_column_name",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "inc_code_name",
-									"dependencyConditions": [
-										"Succeeded"
-									]
 								}
 							],
 							"policy": {
@@ -1057,7 +1029,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "SELECT * FROM @{variables('inc_source_file_name')}\nWHERE @{variables('inc_timestamp_column_name')} > (\n    SELECT COALESCE(MAX(@{variables('inc_timestamp_column_name')}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{variables('inc_target_table_name')}\n);",
+										"value": "SELECT * FROM @{item().source_table}\nWHERE @{item().timestamp_column_name} > (\n    SELECT COALESCE(MAX(@{item().timestamp_column_name}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{item().target_table}\n);",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -1108,7 +1080,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "inc_before_row_counts_target_table",
+									"activity": "inc_lookup_before_row_counts",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -1158,7 +1130,7 @@
 								{
 									"activity": "incremental_load",
 									"dependencyConditions": [
-										"Completed"
+										"Succeeded"
 									]
 								}
 							],
@@ -1231,7 +1203,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{variables('inc_source_file_name')}' as source_file_name,\n'@{variables('inc_target_table_name')}' as target_table_name,\n'@{variables('inc_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('inc_inserted_row_count')}' as inserted_row_count,\n'@{variables('inc_before_row_counts')}' as no_change_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
+										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('inc_start_time')}' as start_time,\n'@{variables('inc_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{activity('incremental_load').output.rowsCopied}' as inserted_row_count,\n'@{activity('inc_lookup_before_row_counts').output.firstRow}' as no_change_row_count,\n'@{variables('inc_start_time')}' as last_pulled_time;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -1420,12 +1392,6 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
-								},
-								{
-									"activity": "inc_end_time",
-									"dependencyConditions": [
-										"Succeeded"
-									]
 								}
 							],
 							"policy": {
@@ -1449,7 +1415,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select \n'@{variables('inc_code_name')}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{variables('inc_target_table_name')}' as target_table_name,\n'@{variables('inc_source_file_name')}' as source_file_name,\n'@{variables('inc_end_time')}' as execution_time,\n'@{variables('inc_error_details')}' as error_details;",
+										"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{replace(activity('incremental_load').Error.Message, '''', '''''')}' as execution_time,\n'@{variables('inc_error_details')}' as error_details;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -1582,74 +1548,6 @@
 							]
 						},
 						{
-							"name": "inc_source_table_name",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_source_file_name",
-								"value": {
-									"value": "@item().source_table",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "inc_target_table_name",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_target_table_name",
-								"value": {
-									"value": "@item().target_table",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "inc_timestamp_column_name",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_timestamp_column_name",
-								"value": {
-									"value": "@item().timestamp_column_name",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "inc_code_name",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_code_name",
-								"value": {
-									"value": "@item().load_type",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "inc_lookup_before_row_counts",
 							"type": "Lookup",
 							"dependsOn": [],
@@ -1678,30 +1576,6 @@
 									}
 								}
 							}
-						},
-						{
-							"name": "inc_before_row_counts_target_table",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "inc_lookup_before_row_counts",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "inc_before_row_counts",
-								"value": {
-									"value": "@activity('inc_lookup_before_row_counts').output.firstRow.before_total_rows\n",
-									"type": "Expression"
-								}
-							}
 						}
 					]
 				}
@@ -1709,6 +1583,8 @@
 			{
 				"name": "filter_scd_2",
 				"type": "Filter",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "lookup_master_table",
@@ -1732,6 +1608,8 @@
 			{
 				"name": "scd2_loop",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_scd_2",
@@ -2471,78 +2349,6 @@
 							}
 						},
 						{
-							"name": "scd2_lookup_source_primary_key",
-							"type": "Lookup",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzurePostgreSqlSource",
-									"query": {
-										"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().source_table}';",
-										"type": "Expression"
-									},
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "TGT_PGSQL",
-									"type": "DatasetReference",
-									"parameters": {
-										"TgtTableName": {
-											"value": "arshad.master_table",
-											"type": "Expression"
-										}
-									}
-								},
-								"firstRowOnly": false
-							}
-						},
-						{
-							"name": "scd2_lookup_active_column_name",
-							"type": "Lookup",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "AzurePostgreSqlSource",
-									"query": {
-										"value": "SELECT active_column_name\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
-										"type": "Expression"
-									},
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "TGT_PGSQL",
-									"type": "DatasetReference",
-									"parameters": {
-										"TgtTableName": {
-											"value": "arshad.master_table",
-											"type": "Expression"
-										}
-									}
-								},
-								"firstRowOnly": false
-							}
-						},
-						{
 							"name": "scd2_no_change_row_count",
 							"type": "SetVariable",
 							"dependsOn": [
@@ -2662,19 +2468,10 @@
 			"inc_end_time": {
 				"type": "String"
 			},
-			"inc_source_file_name": {
-				"type": "String"
-			},
-			"inc_target_table_name": {
-				"type": "String"
-			},
 			"inc_inserted_row_count": {
 				"type": "Integer"
 			},
 			"inc_error_details": {
-				"type": "String"
-			},
-			"inc_timestamp_column_name": {
 				"type": "String"
 			},
 			"scd1_primary_key_column": {
@@ -2708,9 +2505,6 @@
 				"type": "String"
 			},
 			"scd1_code_name": {
-				"type": "String"
-			},
-			"inc_code_name": {
 				"type": "String"
 			},
 			"scd1_tgt_timestamp_column": {
@@ -2790,9 +2584,6 @@
 			},
 			"scd2_md5_columns": {
 				"type": "String"
-			},
-			"inc_before_row_counts": {
-				"type": "Integer"
 			}
 		},
 		"annotations": [],
