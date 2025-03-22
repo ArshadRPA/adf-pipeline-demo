@@ -639,6 +639,12 @@
 								"dataflow": {
 									"referenceName": "df_scd_1",
 									"type": "DataFlowReference",
+									"parameters": {
+										"scd1_primary_key_column": {
+											"value": "'@{variables('scd1_primary_key_column')}'",
+											"type": "Expression"
+										}
+									},
 									"datasetParameters": {
 										"SourceTables": {
 											"SrcTableName": {
@@ -1064,7 +1070,13 @@
 							"inputs": [
 								{
 									"referenceName": "SCR_PGSQL",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"SrcTableName": {
+											"value": "@item().source_table",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [
@@ -2289,6 +2301,28 @@
 								"dataflow": {
 									"referenceName": "df_scd_2",
 									"type": "DataFlowReference",
+									"parameters": {
+										"scd2_timestamp_column_name": {
+											"value": "'@{variables('scd2_timestamp_column_name')}'",
+											"type": "Expression"
+										},
+										"scd2_all_column_names": {
+											"value": "@variables('scd2_md5_columns_array')",
+											"type": "Expression"
+										},
+										"scd2_source_primary_key": {
+											"value": "'@{variables('scd2_source_pk')}'",
+											"type": "Expression"
+										},
+										"scd2_target_primary_key": {
+											"value": "'@{variables('scd2_target_pk')}'",
+											"type": "Expression"
+										},
+										"scd2_active_column": {
+											"value": "'@{variables('scd2_status_column')}'",
+											"type": "Expression"
+										}
+									},
 									"datasetParameters": {
 										"SourceTables": {
 											"SrcTableName": {
@@ -2297,6 +2331,12 @@
 											}
 										},
 										"TargetTables": {
+											"TgtTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
+										},
+										"LoadUpsert": {
 											"TgtTableName": {
 												"value": "@item().target_table",
 												"type": "Expression"
