@@ -185,139 +185,176 @@
 										{
 											"source": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "start_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "start_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "end_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "end_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "inserted_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "inserted_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "updated_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "updated_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "no_change_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "no_change_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "last_pulled_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "last_pulled_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										}
-									]
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
 								}
 							},
 							"inputs": [
 								{
 									"referenceName": "dummy_audit_table",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "audit_table",
 									"type": "DatasetReference"
 								}
 							]
@@ -599,6 +636,24 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"dataflow": {
+									"referenceName": "df_scd_1",
+									"type": "DataFlowReference",
+									"datasetParameters": {
+										"SourceTables": {
+											"SrcTableName": {
+												"value": "@item().source_table",
+												"type": "Expression"
+											}
+										},
+										"TargetTable": {
+											"TgtTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
+										}
+									}
+								},
 								"compute": {
 									"coreCount": 8,
 									"computeType": "General"
@@ -996,8 +1051,22 @@
 									"writeBatchTimeout": "00:30:00",
 									"writeMethod": "CopyCommand"
 								},
-								"enableStaging": false
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
+							"inputs": [
+								{
+									"referenceName": "SCR_PGSQL",
+									"type": "DatasetReference"
+								}
+							],
 							"outputs": [
 								{
 									"referenceName": "TGT_PGSQL",
@@ -1157,129 +1226,164 @@
 										{
 											"source": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "start_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "start_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "end_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "end_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "inserted_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "inserted_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "no_change_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "no_change_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "last_pulled_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "last_pulled_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										}
-									]
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
 								}
 							},
 							"inputs": [
 								{
 									"referenceName": "dummy_audit_table",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "audit_table",
 									"type": "DatasetReference"
 								}
 							]
@@ -1760,139 +1864,176 @@
 										{
 											"source": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "code_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "run_id",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_system",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "schema_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "target_table_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "source_file_name",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "start_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "start_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "end_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "end_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										},
 										{
 											"source": {
 												"name": "inserted_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "inserted_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "updated_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "updated_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "no_change_row_count",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "no_change_row_count",
-												"type": "Int32"
+												"type": "Int32",
+												"physicalType": "integer"
 											}
 										},
 										{
 											"source": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "status",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											}
 										},
 										{
 											"source": {
 												"name": "last_pulled_time",
-												"type": "String"
+												"type": "String",
+												"physicalType": "text"
 											},
 											"sink": {
 												"name": "last_pulled_time",
-												"type": "DateTime"
+												"type": "DateTime",
+												"physicalType": "timestamp without time zone"
 											}
 										}
-									]
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
 								}
 							},
 							"inputs": [
 								{
 									"referenceName": "dummy_audit_table",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "audit_table",
 									"type": "DatasetReference"
 								}
 							]
@@ -2145,6 +2286,27 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"dataflow": {
+									"referenceName": "df_scd_2",
+									"type": "DataFlowReference",
+									"datasetParameters": {
+										"SourceTables": {
+											"SrcTableName": {
+												"value": "@item().source_table",
+												"type": "Expression"
+											}
+										},
+										"TargetTables": {
+											"TgtTableName": {
+												"value": "@item().target_table",
+												"type": "Expression"
+											}
+										},
+										"LoadUpdate": {
+											"TgtTableName": "@item().target_table"
+										}
+									}
+								},
 								"compute": {
 									"coreCount": 8,
 									"computeType": "General"
