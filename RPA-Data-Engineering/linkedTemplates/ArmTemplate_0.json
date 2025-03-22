@@ -3335,7 +3335,7 @@
 									"typeProperties": {
 										"variableName": "scd2_delta_records",
 										"value": {
-											"value": "@add(activity('scd_2').output.runStatus.metrics.LoadInsert.rowsWritten, variables('scd2_updated_row_count'))",
+											"value": "@add(activity('scd_2').output.runStatus.metrics.LoadUpsert.rowsWritten, variables('scd2_updated_row_count'))",
 											"type": "Expression"
 										}
 									}
