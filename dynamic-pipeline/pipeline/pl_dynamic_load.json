@@ -2458,7 +2458,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "SELECT active_column_name\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
+										"value": "SELECT active_column_name as status_column\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
