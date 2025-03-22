@@ -716,11 +716,11 @@
 					],
 					"scriptLines": [
 						"parameters{",
-						"     scd2_timestamp_column_name as string,",
-						"     scd2_all_column_names as string[],",
-						"     scd2_source_primary_key as string,",
-						"     scd2_target_primary_key as string,",
-						"     scd2_active_column as string",
+						"     scd2_timestamp_column as string,",
+						"     scd2_md5_columns as string,",
+						"     scd2_source_pk as string,",
+						"     scd2_target_pk as string,",
+						"     scd2_status_column as string",
 						"}",
 						"source(allowSchemaDrift: true,",
 						"     validateSchema: true,",
@@ -733,18 +733,19 @@
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> TargetTables",
 						"SourceTables derive(Hash = md5(concat(\r",
-						"    coalesce(toString(byName($scd2_all_column_names[0])), ''), '|',\r",
-						"    coalesce(toString(byName($scd2_all_column_names[1])), ''), '|',\r",
-						"    coalesce(toString(byName($scd2_all_column_names[2])), ''), '|',\r",
-						"    coalesce(toString(byName($scd2_all_column_names[3])), ''), '|',\r",
-						"    coalesce(toString(byName($scd2_all_column_names[4])), '')\r",
-						"))) ~> SourceHash",
-						"FilterActiveOnly derive(Hash = md5(concat(    \r",
-						"    coalesce(toString(byName($scd2_all_column_names[0])), ''), '|',    \r",
-						"    coalesce(toString(byName($scd2_all_column_names[1])), ''), '|',    \r",
-						"    coalesce(toString(byName($scd2_all_column_names[2])), ''), '|',    \r",
-						"    coalesce(toString(byName($scd2_all_column_names[3])), ''), '|',    \r",
-						"    coalesce(toString(byName($scd2_all_column_names[4])), '')\r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[0])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[1])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[2])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[3])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[4])), '')\r",
+						"    )\r",
+						")) ~> SourceHash",
+						"FilterActiveOnly derive(Hash = md5(concat(\r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[0])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[1])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[2])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[3])), ''), '|',    \r",
+						"    coalesce(toString(byName(split($scd2_md5_columns, ',')[4])), '')\r",
 						"    )\r",
 						")) ~> TargetHash",
 						"ForInsertRow derive(start_date = currentTimestamp(),",
@@ -753,13 +754,13 @@
 						"SourceHash, TargetHash exists(SourceHash@Hash == TargetHash@Hash,",
 						"     negate:true,",
 						"     broadcast: 'auto')~> ForInsertRow",
-						"TargetHash, SourceHash exists($scd2_source_primary_key==$scd2_target_primary_key,",
+						"TargetHash, SourceHash exists($scd2_source_pk==$scd2_target_pk,",
 						"     negate:false,",
 						"     broadcast: 'auto')~> ExistsTarget",
 						"UpdateAuditColumns alterRow(updateIf(true())) ~> UpdateIf",
 						"ExisitsForUpdate derive(end_date = currentTimestamp(),",
 						"          status = 'N') ~> UpdateAuditColumns",
-						"TargetTables filter(toString(byName(($scd2_active_column)))=='Y') ~> FilterActiveOnly",
+						"TargetTables filter(toString(byName(($scd2_status_column)))=='Y') ~> FilterActiveOnly",
 						"ExistsTarget, SourceHash exists(TargetHash@Hash==SourceHash@Hash,",
 						"     negate:true,",
 						"     broadcast: 'auto')~> ExisitsForUpdate",
@@ -827,6 +828,8 @@
 					{
 						"name": "scd1_loop",
 						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "filter_scd_1",
@@ -1739,6 +1742,8 @@
 					{
 						"name": "filter_scd_1",
 						"type": "Filter",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "lookup_master_table",
@@ -1762,6 +1767,8 @@
 					{
 						"name": "filter_inc_load",
 						"type": "Filter",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "lookup_master_table",
@@ -1785,6 +1792,8 @@
 					{
 						"name": "incremental_loop",
 						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "filter_inc_load",
@@ -2546,7 +2555,26 @@
 								{
 									"name": "scd2_start_time",
 									"type": "SetVariable",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "scd2_target_pk",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_source_pk",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd2_status_column",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"secureOutput": false,
 										"secureInput": false
@@ -3031,69 +3059,11 @@
 									]
 								},
 								{
-									"name": "scd2_source_table_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_source_file_name",
-										"value": {
-											"value": "@item().source_table",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_target_table_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_target_table_name",
-										"value": {
-											"value": "@item().target_table",
-											"type": "Expression"
-										}
-									}
-								},
-								{
 									"name": "scd_2",
 									"type": "ExecuteDataFlow",
 									"dependsOn": [
 										{
 											"activity": "scd2_start_time",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_code_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_timestamp_column_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_target_table_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_source_table_name",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3112,23 +3082,23 @@
 											"referenceName": "df_scd_2",
 											"type": "DataFlowReference",
 											"parameters": {
-												"scd2_timestamp_column_name": {
-													"value": "'@{variables('scd2_timestamp_column_name')}'",
+												"scd2_timestamp_column": {
+													"value": "'@{item().timestamp_column_name}'",
 													"type": "Expression"
 												},
-												"scd2_all_column_names": {
-													"value": "@variables('scd2_md5_columns_array')",
+												"scd2_md5_columns": {
+													"value": "'@{item().md5_columns}'",
 													"type": "Expression"
 												},
-												"scd2_source_primary_key": {
+												"scd2_source_pk": {
 													"value": "'@{variables('scd2_source_pk')}'",
 													"type": "Expression"
 												},
-												"scd2_target_primary_key": {
+												"scd2_target_pk": {
 													"value": "'@{variables('scd2_target_pk')}'",
 													"type": "Expression"
 												},
-												"scd2_active_column": {
+												"scd2_status_column": {
 													"value": "'@{variables('scd2_status_column')}'",
 													"type": "Expression"
 												}
@@ -3163,65 +3133,6 @@
 											"computeType": "General"
 										},
 										"traceLevel": "Fine"
-									}
-								},
-								{
-									"name": "scd2_timestamp_column_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_timestamp_column_name",
-										"value": {
-											"value": "@item().timestamp_column_name",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_code_name",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_target_pk",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_source_pk",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_active_column_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd2_md5_columns_in_array",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_code_name",
-										"value": {
-											"value": "@item().load_type",
-											"type": "Expression"
-										}
 									}
 								},
 								{
@@ -3271,7 +3182,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT COUNT(*) AS after_total_rows\nFROM @{item().target_table};\n",
+												"value": "SELECT COUNT(*) AS after_total_rows\nFROM @{variables('scd2_target_table_name')};",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -3341,31 +3252,7 @@
 									}
 								},
 								{
-									"name": "scd2_md5_columns_in_array",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_md5_columns",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_md5_columns_array",
-										"value": {
-											"value": "@split(variables('scd2_md5_columns'), ',')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_lookup_target_primary_key",
+									"name": "scd2_lookup_pk_status_columns",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -3380,7 +3267,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
+												"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().source_table}';\n\n\nSELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().target_table}';\n\nSELECT active_column_name\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -3401,6 +3288,8 @@
 								{
 									"name": "scd2_lookup_source_primary_key",
 									"type": "Lookup",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
 									"dependsOn": [],
 									"policy": {
 										"timeout": "0.12:00:00",
@@ -3435,6 +3324,8 @@
 								{
 									"name": "scd2_lookup_active_column_name",
 									"type": "Lookup",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
 									"dependsOn": [],
 									"policy": {
 										"timeout": "0.12:00:00",
@@ -3467,11 +3358,11 @@
 									}
 								},
 								{
-									"name": "scd2_active_column_name",
+									"name": "scd2_status_column",
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_active_column_name",
+											"activity": "scd2_lookup_pk_status_columns",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3485,7 +3376,7 @@
 									"typeProperties": {
 										"variableName": "scd2_status_column",
 										"value": {
-											"value": "@activity('scd2_lookup_active_column_name').output.value[0].active_column_name",
+											"value": "@activity('scd2_lookup_pk_status_columns').output.value[2].active_column_name",
 											"type": "Expression"
 										}
 									}
@@ -3495,7 +3386,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_target_primary_key",
+											"activity": "scd2_lookup_pk_status_columns",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3509,7 +3400,7 @@
 									"typeProperties": {
 										"variableName": "scd2_target_pk",
 										"value": {
-											"value": "@activity('scd2_lookup_target_primary_key').output.value[0].primary_key_column",
+											"value": "@activity('scd2_lookup_pk_status_columns').output.value[1].primary_key_column",
 											"type": "Expression"
 										}
 									}
@@ -3519,7 +3410,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_source_primary_key",
+											"activity": "scd2_lookup_pk_status_columns",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3533,62 +3424,7 @@
 									"typeProperties": {
 										"variableName": "scd2_source_pk",
 										"value": {
-											"value": "@activity('scd2_lookup_source_primary_key').output.value[0].primary_key_column",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd2_lookup_md5_columns",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzurePostgreSqlSource",
-											"query": {
-												"value": "SELECT md5_columns\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
-												"type": "Expression"
-											},
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "TGT_PGSQL",
-											"type": "DatasetReference",
-											"parameters": {
-												"TgtTableName": "arshad.master_table"
-											}
-										},
-										"firstRowOnly": false
-									}
-								},
-								{
-									"name": "scd2_md5_columns",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd2_lookup_md5_columns",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd2_md5_columns",
-										"value": {
-											"value": "@activity('scd2_lookup_md5_columns').output.value[0].md5_columns",
+											"value": "@activity('scd2_lookup_pk_status_columns').output.value[0].primary_key_column",
 											"type": "Expression"
 										}
 									}
