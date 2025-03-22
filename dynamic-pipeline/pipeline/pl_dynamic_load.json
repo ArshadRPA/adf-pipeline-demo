@@ -22,7 +22,10 @@
 					},
 					"dataset": {
 						"referenceName": "LOOKUP_PGSQL",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"table_name": "arshad.master_table"
+						}
 					},
 					"firstRowOnly": false
 				}
