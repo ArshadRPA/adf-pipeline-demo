@@ -165,7 +165,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd1_start_time')}' as start_time,\n'@{variables('scd1_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{sub(activity('scd1_lookup_after_row_counts').output.firstRow.after_total_rows, activity('scd1_lookup_before_row_count').output.firstRow.before_total_rows)}' as inserted_row_count,\n'@{sub(activity('scd1_lookup_delta_records').output.firstRow.count, variables('scd1_inserted_row_count'))}' as updated_row_count,\n'@{variables('scd1_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd1_start_time')}' as last_pulled_time;",
+										"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd1_start_time')}' as start_time,\n'@{variables('scd1_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd1_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd1_updated_row_count')}' as updated_row_count,\n'@{variables('scd1_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd1_start_time')}' as last_pulled_time;",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
@@ -542,6 +542,12 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "scd1_count_delta_records",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"policy": {
@@ -646,8 +652,6 @@
 						{
 							"name": "scd1_before_row_counts",
 							"type": "SetVariable",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "scd1_lookup_before_row_count",
@@ -672,14 +676,7 @@
 						{
 							"name": "scd1_lookup_before_row_count",
 							"type": "Lookup",
-							"dependsOn": [
-								{
-									"activity": "scd1_count_delta_records",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -747,8 +744,6 @@
 						{
 							"name": "scd1_after_row_counts",
 							"type": "SetVariable",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "scd1_lookup_after_row_counts",
