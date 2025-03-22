@@ -1753,19 +1753,19 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "scd2_target_pk",
+									"activity": "scd2_lookup_status_column",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "scd2_source_pk",
+									"activity": "scd2_lookup_source_pk",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "scd2_status_column",
+									"activity": "scd2_lookup_target_pk",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2283,15 +2283,15 @@
 											"type": "Expression"
 										},
 										"scd2_source_pk": {
-											"value": "'@{variables('scd2_source_pk')}'",
+											"value": "'@{activity('scd2_lookup_source_pk').output.value[0].source_pk}'",
 											"type": "Expression"
 										},
 										"scd2_target_pk": {
-											"value": "'@{variables('scd2_target_pk')}'",
+											"value": "'@{activity('scd2_lookup_target_pk').output.value[0].target_pk}'",
 											"type": "Expression"
 										},
 										"scd2_status_column": {
-											"value": "'@{variables('scd2_status_column')}'",
+											"value": "'@{activity('scd2_lookup_status_column').output.value[0].status_column}'",
 											"type": "Expression"
 										}
 									},
@@ -2546,78 +2546,6 @@
 									}
 								},
 								"firstRowOnly": false
-							}
-						},
-						{
-							"name": "scd2_status_column",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "scd2_lookup_status_column",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "scd2_status_column",
-								"value": {
-									"value": "@activity('scd2_lookup_status_column').output.value[0].status_column",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "scd2_target_pk",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "scd2_lookup_target_pk",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "scd2_target_pk",
-								"value": {
-									"value": "@activity('scd2_lookup_target_pk').output.value[0].target_pk",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "scd2_source_pk",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "scd2_lookup_source_pk",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "scd2_source_pk",
-								"value": {
-									"value": "@activity('scd2_lookup_source_pk').output.value[0].source_pk",
-									"type": "Expression"
-								}
 							}
 						},
 						{
