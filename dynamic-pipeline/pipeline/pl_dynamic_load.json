@@ -625,7 +625,7 @@
 								"source": {
 									"type": "AzurePostgreSqlSource",
 									"query": {
-										"value": "SELECT COUNT(*) AS count\nFROM @{variables('scd1_source_file_name')}\nWHERE @{variables('scd1_timestamp_column_name')} > (\n    SELECT COALESCE(MAX(@{variables('scd1_timestamp_column_name')}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{variables('scd1_target_table_name')}\n);",
+										"value": "SELECT COUNT(*) AS count\nFROM @{item().source_table}\nWHERE @{item().timestamp_column_name} > (\n    SELECT COALESCE(MAX(@{item().timestamp_column_name}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{item().target_table}\n);",
 										"type": "Expression"
 									},
 									"partitionOption": "None"
