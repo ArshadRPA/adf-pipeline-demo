@@ -1800,7 +1800,7 @@
 							"typeProperties": {
 								"variableName": "scd2_inserted_row_count",
 								"value": {
-									"value": "@sub(activity('scd_2').output.runStatus.metrics.LoadInsert.rowsWritten,variables('scd2_updated_row_count'))",
+									"value": "@sub(activity('scd_2').output.runStatus.metrics.LoadUpsert.rowsWritten,variables('scd2_updated_row_count'))",
 									"type": "Expression"
 								}
 							}
