@@ -3125,7 +3125,8 @@
 												"LoadUpdate": {
 													"TgtTableName": "@item().target_table"
 												}
-											}
+											},
+											"linkedServiceParameters": {}
 										},
 										"staging": {},
 										"compute": {
@@ -3252,7 +3253,7 @@
 									}
 								},
 								{
-									"name": "scd2_lookup_pk_status_columns",
+									"name": "scd2_lookup_status_column",
 									"type": "Lookup",
 									"dependsOn": [],
 									"policy": {
@@ -3267,7 +3268,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().source_table}';\n\n\nSELECT primary_key_column\nFROM arshad.master_table\nWHERE source_table= '@{item().target_table}';\n\nSELECT active_column_name\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
+												"value": "SELECT active_column_name as status_column\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -3362,7 +3363,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_pk_status_columns",
+											"activity": "scd2_lookup_status_column",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3376,7 +3377,7 @@
 									"typeProperties": {
 										"variableName": "scd2_status_column",
 										"value": {
-											"value": "@activity('scd2_lookup_pk_status_columns').output.value[2].active_column_name",
+											"value": "@activity('scd2_lookup_status_column').output.value[0].status_column",
 											"type": "Expression"
 										}
 									}
@@ -3386,7 +3387,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_pk_status_columns",
+											"activity": "scd2_lookup_target_pk",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3400,7 +3401,7 @@
 									"typeProperties": {
 										"variableName": "scd2_target_pk",
 										"value": {
-											"value": "@activity('scd2_lookup_pk_status_columns').output.value[1].primary_key_column",
+											"value": "@activity('scd2_lookup_target_pk').output.value[0].target_pk",
 											"type": "Expression"
 										}
 									}
@@ -3410,7 +3411,7 @@
 									"type": "SetVariable",
 									"dependsOn": [
 										{
-											"activity": "scd2_lookup_pk_status_columns",
+											"activity": "scd2_lookup_source_pk",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -3424,7 +3425,7 @@
 									"typeProperties": {
 										"variableName": "scd2_source_pk",
 										"value": {
-											"value": "@activity('scd2_lookup_pk_status_columns').output.value[0].primary_key_column",
+											"value": "@activity('scd2_lookup_source_pk').output.value[0].source_pk",
 											"type": "Expression"
 										}
 									}
@@ -3451,6 +3452,74 @@
 											"value": "@sub(int(variables('scd2_after_row_counts_target_table')),\nint(variables('scd2_delta_records')))",
 											"type": "Expression"
 										}
+									}
+								},
+								{
+									"name": "scd2_lookup_source_pk",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzurePostgreSqlSource",
+											"query": {
+												"value": "SELECT primary_key_column as source_pk\nFROM arshad.master_table\nWHERE source_table= '@{item().source_table}';",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "TGT_PGSQL",
+											"type": "DatasetReference",
+											"parameters": {
+												"TgtTableName": {
+													"value": "arshad.master_table",
+													"type": "Expression"
+												}
+											}
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "scd2_lookup_target_pk",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzurePostgreSqlSource",
+											"query": {
+												"value": "SELECT primary_key_column as target_pk\nFROM arshad.master_table\nWHERE target_table= '@{item().target_table}';",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "TGT_PGSQL",
+											"type": "DatasetReference",
+											"parameters": {
+												"TgtTableName": {
+													"value": "arshad.master_table",
+													"type": "Expression"
+												}
+											}
+										},
+										"firstRowOnly": false
 									}
 								}
 							]
