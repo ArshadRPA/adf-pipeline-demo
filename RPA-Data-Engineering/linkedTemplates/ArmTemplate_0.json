@@ -830,8 +830,6 @@
 					{
 						"name": "scd1_loop",
 						"type": "ForEach",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "filter_scd_1",
@@ -914,30 +912,6 @@
 									}
 								},
 								{
-									"name": "scd1_error_details",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "scd_1",
-											"dependencyConditions": [
-												"Failed"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_error_details",
-										"value": {
-											"value": "@replace(\t\t\t\t\t\t\n   replace(\t\t\t\t\t\t\n      replace(\t\t\t\t\t\t\n         replace(\t\t\t\t\t\t\n            replace(activity('scd_1').Error.Message, '''', ''''''),\t\t\t\t\t\t\n            '\"', '\\\"'\t\t\t\t\t\t\n         ),\t\t\t\t\t\t\n         '(', ''\t\t\t\t\t\t\n      ),\t\t\t\t\t\t\n      ')', ''\t\t\t\t\t\t\n   ),\t\t\t\t\t\t\n   ',', ''\t\t\t\t\t\t\n)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
 									"name": "scd1_audit_table",
 									"type": "Copy",
 									"dependsOn": [
@@ -969,7 +943,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd1_start_time')}' as start_time,\n'@{variables('scd1_end_time')}' as end_time,\n'@{variables('scd1_source_file_name')}' as source_file_name,\n'@{variables('scd1_target_table_name')}' as target_table_name,\n'@{variables('scd1_code_name')}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd1_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd1_updated_row_count')}' as updated_row_count,\n'@{variables('scd1_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd1_start_time')}' as last_pulled_time;",
+												"value": "select\n'@{pipeline().RunId}' as run_id,\n'@{variables('scd1_start_time')}' as start_time,\n'@{variables('scd1_end_time')}' as end_time,\n'@{item().source_table}' as source_file_name,\n'@{item().target_table}' as target_table_name,\n'@{item().load_type}' as code_name,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.status}' as status,\n'@{variables('scd1_inserted_row_count')}' as inserted_row_count,\n'@{variables('scd1_updated_row_count')}' as updated_row_count,\n'@{variables('scd1_no_change_row_count')}' as no_change_row_count,\n'@{variables('scd1_start_time')}' as last_pulled_time;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -1168,15 +1142,9 @@
 									"type": "Copy",
 									"dependsOn": [
 										{
-											"activity": "scd1_error_details",
+											"activity": "scd_1",
 											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd1_end_time",
-											"dependencyConditions": [
-												"Succeeded"
+												"Failed"
 											]
 										}
 									],
@@ -1201,7 +1169,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select \n'@{variables('scd1_code_name')}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{variables('scd1_target_table_name')}' as target_table_name,\n'@{variables('scd1_source_file_name')}' as source_file_name,\n'@{variables('scd1_end_time')}' as execution_time,\n'@{variables('scd1_error_details')}' as error_details;",
+												"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{variables('scd1_end_time')}' as execution_time,\n'@{replace(activity('scd_1').Error.Message, '''', '''''')}' as error_details;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -1336,57 +1304,6 @@
 									]
 								},
 								{
-									"name": "scd1_source_table_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_source_file_name",
-										"value": {
-											"value": "@item().source_table",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd1_target_table_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_target_table_name",
-										"value": {
-											"value": "@item().target_table",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd1_primary_key_column",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_primary_key_column",
-										"value": {
-											"value": "@item().primary_key_column",
-											"type": "Expression"
-										}
-									}
-								},
-								{
 									"name": "scd_1",
 									"type": "ExecuteDataFlow",
 									"dependsOn": [
@@ -1397,37 +1314,13 @@
 											]
 										},
 										{
-											"activity": "scd1_source_table_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd1_target_table_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd1_primary_key_column",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd1_timestamp_column_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
-											"activity": "scd1_code_name",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										},
-										{
 											"activity": "scd1_before_row_counts",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "scd1_count_delta_records",
 											"dependencyConditions": [
 												"Succeeded"
 											]
@@ -1447,7 +1340,7 @@
 											"type": "DataFlowReference",
 											"parameters": {
 												"scd1_primary_key_column": {
-													"value": "'@{variables('scd1_primary_key_column')}'",
+													"value": "'@{item().primary_key_column}'",
 													"type": "Expression"
 												}
 											},
@@ -1473,40 +1366,6 @@
 										},
 										"traceLevel": "Fine",
 										"runConcurrently": true
-									}
-								},
-								{
-									"name": "scd1_timestamp_column_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_timestamp_column_name",
-										"value": {
-											"value": "@item().timestamp_column_name",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "scd1_code_name",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "scd1_code_name",
-										"value": {
-											"value": "@item().load_type",
-											"type": "Expression"
-										}
 									}
 								},
 								{
@@ -1549,7 +1408,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "SELECT COUNT(*) AS count\nFROM @{variables('scd1_source_file_name')}\nWHERE @{variables('scd1_timestamp_column_name')} > (\n    SELECT COALESCE(MAX(@{variables('scd1_timestamp_column_name')}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{variables('scd1_target_table_name')}\n);",
+												"value": "SELECT COUNT(*) AS count\nFROM @{item().source_table}\nWHERE @{item().timestamp_column_name} > (\n    SELECT COALESCE(MAX(@{item().timestamp_column_name}), '2020-01-01 00:00:00'::timestamp)\n    FROM @{item().target_table}\n);",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -1564,7 +1423,7 @@
 												}
 											}
 										},
-										"firstRowOnly": false
+										"firstRowOnly": true
 									}
 								},
 								{
@@ -1594,14 +1453,7 @@
 								{
 									"name": "scd1_lookup_before_row_count",
 									"type": "Lookup",
-									"dependsOn": [
-										{
-											"activity": "scd1_count_delta_records",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
+									"dependsOn": [],
 									"policy": {
 										"timeout": "0.12:00:00",
 										"retry": 0,
@@ -1663,7 +1515,7 @@
 												"TgtTableName": "@item().target_table"
 											}
 										},
-										"firstRowOnly": false
+										"firstRowOnly": true
 									}
 								},
 								{
@@ -1685,7 +1537,7 @@
 									"typeProperties": {
 										"variableName": "scd1_after_row_counts_target_table",
 										"value": {
-											"value": "@activity('scd1_lookup_after_row_counts').output.value[0].after_total_rows",
+											"value": "@activity('scd1_lookup_after_row_counts').output.firstRow.after_total_rows",
 											"type": "Expression"
 										}
 									}
@@ -1709,7 +1561,7 @@
 									"typeProperties": {
 										"variableName": "scd1_delta_records",
 										"value": {
-											"value": "@activity('scd1_lookup_delta_records').output.value[0].count\n",
+											"value": "@activity('scd1_lookup_delta_records').output.firstRow.count\n",
 											"type": "Expression"
 										}
 									}
@@ -1744,8 +1596,6 @@
 					{
 						"name": "filter_scd_1",
 						"type": "Filter",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "lookup_master_table",
@@ -2171,7 +2021,7 @@
 										"source": {
 											"type": "AzurePostgreSqlSource",
 											"query": {
-												"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{variables('inc_start_time')}' as execution_time,\n'@{replace(activity('incremental_load').Error.Message, '''', '''''')}' as error_details;",
+												"value": "select \n'@{item().load_type}' as code_name,\n'@{pipeline().RunId}' as run_id,\n'@{pipeline().parameters.source_system}' as source_system,\n'@{pipeline().parameters.schema_name}' as schema_name,\n'@{item().target_table}' as target_table_name,\n'@{item().source_table}' as source_file_name,\n'@{variables('inc_end_time')}' as execution_time,\n'@{replace(activity('incremental_load').Error.Message, '''', '''''')}' as error_details;",
 												"type": "Expression"
 											},
 											"partitionOption": "None"
@@ -2341,8 +2191,6 @@
 					{
 						"name": "filter_scd_2",
 						"type": "Filter",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "lookup_master_table",
@@ -2366,8 +2214,6 @@
 					{
 						"name": "scd2_loop",
 						"type": "ForEach",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "filter_scd_2",
