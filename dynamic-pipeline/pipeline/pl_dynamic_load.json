@@ -115,25 +115,6 @@
 							}
 						},
 						{
-							"name": "scd1_error_details",
-							"type": "SetVariable",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "scd1_error_details",
-								"value": {
-									"value": "@replace(\t\t\t\t\t\t\n   replace(\t\t\t\t\t\t\n      replace(\t\t\t\t\t\t\n         replace(\t\t\t\t\t\t\n            replace(activity('scd_1').Error.Message, '''', ''''''),\t\t\t\t\t\t\n            '\"', '\\\"'\t\t\t\t\t\t\n         ),\t\t\t\t\t\t\n         '(', ''\t\t\t\t\t\t\n      ),\t\t\t\t\t\t\n      ')', ''\t\t\t\t\t\t\n   ),\t\t\t\t\t\t\n   ',', ''\t\t\t\t\t\t\n)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "scd1_audit_table",
 							"type": "Copy",
 							"dependsOn": [
@@ -361,12 +342,6 @@
 							"name": "scd1_error_table",
 							"type": "Copy",
 							"dependsOn": [
-								{
-									"activity": "scd1_error_details",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
 								{
 									"activity": "scd_1",
 									"dependencyConditions": [
@@ -842,8 +817,6 @@
 			{
 				"name": "filter_inc_load",
 				"type": "Filter",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "lookup_master_table",
@@ -867,8 +840,6 @@
 			{
 				"name": "incremental_loop",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_inc_load",
@@ -1414,8 +1385,6 @@
 			{
 				"name": "filter_scd_2",
 				"type": "Filter",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "lookup_master_table",
@@ -1439,8 +1408,6 @@
 			{
 				"name": "scd2_loop",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "filter_scd_2",
